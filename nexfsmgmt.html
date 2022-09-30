@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://nexustorage.com/" />
+    <title>Nexustorage Nexfs Admin Console</title>
+    <meta name="description" content="Nexustorage Nexfs Admin Console">
+    <link rel="stylesheet" href="nexfsmgmt.css" />
+    <script src="nexfsmgmt.js"></script>
+    <script src="crypto-min.js"></script>
+</head>
+
+<body>
+    <main>
+        <div id="header" class="header">
+            <div id="nexfsicon" class="headernexfsicon">
+                <svg width="31" height="39" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden">
+          <defs>
+            <clipPath id="clip0">
+              <rect x="69" y="55" width="31" height="39" />
+            </clipPath>
+            <clipPath id="clip1">
+              <rect x="0" y="0" width="393700" height="495300" />
+            </clipPath>
+            <image width="25" height="30" xlink:href="NexustorageGrayTransparentLogo.png" preserveAspectRatio="none"
+              id="img2"></image>
+            <clipPath id="clip3">
+              <rect x="0" y="0" width="393700" height="472440" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#clip0)" transform="translate(-69 -55)">
+            <g clip-path="url(#clip1)" transform="matrix(7.87402e-05 0 0 7.87402e-05 69 55)">
+              <g clip-path="url(#clip3)" transform="scale(1 1.04839)">
+                <use width="100%" height="100%" xlink:href="#img2" opacity="1" transform="scale(15748 15748)"></use>
+              </g>
+            </g>
+          </g>
+        </svg>
+            </div>
+            <div id="headerlabel" class="headerlabel">
+                Nexustorage Nexfs Admin Console
+            </div>
+            <div id="headerreleaselabel" class="headerreleasetext">
+                Portal Release 0.99
+            </div>
+        </div>
+
+        <div id="inprogressdiv" class="inprogressdiv hidden">
+            <img src="NexustorageBlueLogo.gif" width="150" height="auto" class="inprogressrotation">
+            <div id="inprogresshidediv" class="hidden"></div>
+            <div id="reloadconfdiv" class="hidden"></div>
+            <div id="activeconfigvardiv" class="hidden"></div>
+        </div>
+
+        <div id="FailedHTTPRequest" class="FailedHTTPRequest">
+            <div id="FailedHTTPRequestTextdiv" class="FailedHTTPRequestTextdiv">
+                <center>
+                    <table>
+                        <tr>
+                            <td>
+                                <center>An error communicating with the Nexfs Server has occured</center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div id="FailedHTTPRequestText" class="FailedHTTPRequestText"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div id="CloseHttpFailedWindow" class="closehttpfailedwindow">
+                                    <centre><input type="button" size="30px" value="Close" id="closehttpfailedwindowbutton" onclick="CloseHttpFailedWindow(this)"></centre>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div id="ReloadonError" class="hidden"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </center>
+            </div>
+        </div>
+        <div id="login" class="login">
+            <div id="logindiv" class="logindiv">
+                <center>
+                    <table>
+                        <tr>
+                            <td>Login Name:</td>
+                            <td><input type="text" size="30px" name="username" id="username"></td>
+                        </tr>
+                        <tr>
+                            <td>Password:</td>
+                            <td><input type="password" size="30px" name="password" id="password"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <center><input type="submit" value="Login" id="loginbutton" onclick="getsessiontoken(this); return false;"></center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div id="loginfailed" class="loginfailed">Login Failed</div>
+                            </td>
+                            <td>
+                                <div id=showloginfailedreason class="showloginfailed"><input type="button" size="30px" value="show reason" id="loginfailedbutton" onclick="showloginfailedreason(this)"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div id="loginfailedreason" class="loginfailedreason"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </center>
+            </div>
+        </div>
+
+        <div id="loginprogress" class="loginprogress">
+            <div class="loginprogresstext">
+                Requesting Nexfs Management Console Login...
+            </div>
+        </div>
+
+        <div id="sidemenu" class="sidemenu">
+            <div id="systemstatus" class="sidemenuselected">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">System Status</a>
+            </div>
+            <div id="nexfsconfiguration">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">Nexfs Configuration</a>
+            </div>
+            <div id="nfs">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">NFS</a>
+            </div>
+            <div id="iscsi">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">iSCSI</a>
+            </div>
+            <div id="license">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">License</a>
+            </div>
+            <div id="iam">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">Identity & Access</a>
+            </div>
+            <div id="logout">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">Logout</a>
+            </div>
+            <div id="sessiondetails" class="sessiondetails">
+                <input type="hidden" size="0" id="ts">
+                <input type="hidden" size="0" id="ka">
+                <input type="hidden" size="0" id="ks">
+                <input type="hidden" size="0" id="havesession" value="0">
+            </div>
+        </div>
+
+        <div id="logoutdiv" class="paneldiv">
+            <div id="logoutbutton" class="logoutbutton button" onclick="dologout(this)">
+                <center>Logout</center>
+            </div>
+        </div>
+
+        <div id="configurationhelpdiv" class="configurationhelp hidden" onmouseout="hidediv('configurationhelpdiv')">
+            <table>
+                <tr>
+                    <td colspan="2" id="configurationhelplabel" style="font-weight: bold;"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="line-height:10px;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div id="configurationhelptext" class="helptext"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="line-height:10px;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Live Value:</td>
+                    <td id="configurationlivevalue"></td>
+                </tr>
+                <tr>
+                    <td>Configuration Value:</td>
+                    <td id="configurationvalue"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="line-height:10px;">&nbsp;</td>
+                    <tr>
+                        <td colspan="2">
+                            <div id="configurationhelpname"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>String Value:</td>
+                        <td id="configurationhelpstring"></td>
+                    </tr>
+                    <tr>
+                        <td>Min Value or length:</td>
+                        <td id="configurationhelpmin"></td>
+                    </tr>
+                    <tr>
+                        <td>Max Value or length:</td>
+                        <td id="configurationhelpmax"></td>
+                    </tr>
+                    <tr>
+                        <td>Requires Restart:</td>
+                        <td id="configurationhelprestart"></td>
+                    </tr>
+            </table>
+        </div>
+
+
+        <div id="nexfsconfigurationdiv" class="paneldiv">
+            <div class="topmenutab">
+                <button name="storage" class="topmenutablinks active" onclick="changetopmenuselected(event,'nexfsconfigurationdiv')">Storage</button>
+                <button name="services" class="topmenutablinks" onclick="changetopmenuselected(event,'nexfsconfigurationdiv')">Services</button>
+                <button name="smartprotectandteir" class="topmenutablinks" onclick="changetopmenuselected(event,'nexfsconfigurationdiv')">Smart Protect
+          & Tier</button>
+                <button name="security" class="topmenutablinks" onclick="changetopmenuselected(event,'nexfsconfigurationdiv')">Security</button>
+                <button name="logalert" class="topmenutablinks" onclick="changetopmenuselected(event,'nexfsconfigurationdiv')">Log & Alert</button>
+                <button name="advanced" class="topmenutablinks" onclick="changetopmenuselected(event,'nexfsconfigurationdiv')">Advanced</button>
+            </div>
+
+            <div id="storageconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
+                <div class="toplevel2menutab">
+                    <button name="index" class="toplevel2menutablinks active" onclick="changetoplevel2menuselected(event)">Index
+            Data</button>
+                    <button name="tier1" class="toplevel2menutablinks" onclick="changetoplevel2menuselected(event)">Tier-1
+            (Block)</button>
+                    <button name="tier2" class="toplevel2menutablinks" onclick="changetoplevel2menuselected(event)">Tier-2
+            (Block)</button>
+                    <button name="tier3" class="toplevel2menutablinks" onclick="changetoplevel2menuselected(event)">Tier-3
+            (Cloud/Object)</button>
+                </div>
+
+                <div id="storageindexconfigurationdiv" name="storageindexconfiguration" class="sublevel2paneldiv storageconfigurationtabdiv" style="display: inherit;">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storageindexconfigurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Index Storage (File Structure Data)</div>
+                    &nbsp;<br>&nbsp;<br>&nbsp;<br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T1SDIR',this)">Primary Index
+              Location</label><input type="text" validate="true" class="configinput inputdirectory" id="T1SDIR" oninput="validateconfigform('storageindexconfigurationdiv')" pattern="^/.+" required></div>
+                    <br><br>
+                    <div>
+                        <label class="configlabel" onclick="showconfigurationhelp(event, 'T2SREPLICATIONMODE0',this)">Index
+              Replication Mode</label>
+                        <table>
+                            <tr>
+                                <td class="configinput" id="T2SREPLICATIONMODE">
+                                    <input class="firstradio" type="radio" name="T2SREPLICATIONMODE" id="T2SREPLICATIONMODE0" value="0" onchange="ifcheckedenablevrequired('T2SREPLICATIONMODE0','T2SDIR',false,true,'storageindexconfigurationdiv');">Off
+                                    <input type="radio" name="T2SREPLICATIONMODE" id="T2SREPLICATIONMODE1" value="1" onchange="ifcheckedenablevrequired('T2SREPLICATIONMODE0','T2SDIR',false,true,'storageindexconfigurationdiv')">Asynchronous
+                                    <input type="radio" name="T2SREPLICATIONMODE" id="T2SREPLICATIONMODE2" value="2" onchange="ifcheckedenablevrequired('T2SREPLICATIONMODE0','T2SDIR',false,true,'storageindexconfigurationdiv')">Synchronous
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <br><br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T2SDIR',this)">Replication
+              Location</label><input type="text" validate="true" class="configinput inputdirectory" id="T2SDIR" oninput="validateconfigform('storageindexconfigurationdiv')" pattern="^/.+"></div>
+                    <br><br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'STRUCTERRTHRESHOLD',this)">Replication Failover Threshold</label><input type="number" validate="true" class="configinput" id="STRUCTERRTHRESHOLD" oninput="validateconfigform('storageindexconfigurationdiv')"
+                            required></div>
+                    <br><br>
+                    <br><br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestorageindexconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storageindexconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstorageindexconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storageindexconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div id="storagetier1configurationdiv" name="storagetier1configuration" class="sublevel2paneldiv storageconfigurationtabdiv">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storagetier1configurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Tier-1 Block Storage</div>
+                    &nbsp;<br>&nbsp;<br>&nbsp;<br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T1DDIR',this)">Tier-1 Storage
+              Location</label><input type="text" validate="true" class="configinput inputdirectory" id="T1DDIR" oninput="validateconfigform('storagetier1configurationdiv')" pattern="^/.+" required></div>
+                    <br><br>
+                    <div>
+                        <label class="configlabel" onclick="showconfigurationhelp(event, 'T1DDIRENABLED0',this)">Enabled</label>
+                        <table>
+                            <tr>
+                                <td class="configinput" id="T1DDIRENABLED">
+                                    <input class="firstradio" type="radio" name="T1DDIRENABLED" id="T1DDIRENABLED0" value="0" onchange="ifcheckedenablevrequired('T1DDIRENABLED0','T1DDIR',false,true,'storagetier1configurationdiv');">Off
+                                    <input type="radio" name="T1DDIRENABLED" id="T1DDIRENABLED1" value="1" onchange="ifcheckedenablevrequired('T1DDIRENABLED0','T1DDIR',false,true,'storagetier1configurationdiv')">On
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <br><br>
+                    <div><label class="configlabel" style="cursor: pointer;" id="showadvancedstoragetier1configurationdiv" onclick="toggleadvancedsection('showadvancedstoragetier1configurationdiv','advancedstoragetier1configurationdiv','visibleadvancedstoragetier1configurationdiv','hiddenadvancedstoragetier1configurationdiv')">Show
+              Advanced Settings</label></div>
+                    <div id="visibleadvancedstoragetier1configurationdiv"></div>
+                    <br><br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestoragetier1configurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storagetier1configurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstoragetier1configurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storagetier1configurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div id="hiddenadvancedstoragetier1configurationdiv" class="hidden">
+                        <div id="advancedstoragetier1configurationdiv">
+                            <br>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T1LOWWATERMARK',this)">Low
+                  Watermark %
+                </label><input type="number" validate="true" class="configinput" id="T1LOWWATERMARK" oninput="validateconfigform('storagetier1configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T1HIGHWATERMARK',this)">High
+                  Watermark %
+                </label><input type="number" validate="true" class="configinput" id="T1HIGHWATERMARK" oninput="validateconfigform('storagetier1configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSTIER1LASTWRITTEN',this)">Datapart Lifecycle Last Written
+                  Seconds
+                </label><input type="number" validate="true" class="configinput" id="NEXFSTIER1LASTWRITTEN" oninput="validateconfigform('storagetier1configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSTIER1LASTACCESSED',this)">Datapart Lifecycle Last Accessed
+                  Seconds
+                </label><input type="number" validate="true" class="configinput" id="NEXFSTIER1LASTACCESSED" oninput="validateconfigform('storagetier1configurationdiv')" required></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="storagetier2configurationdiv" name="storagetier2configuration" class="sublevel2paneldiv storageconfigurationtabdiv">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storagetier2configurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Tier-2 Block Storage</div>
+                    &nbsp;<br>&nbsp;<br>&nbsp;<br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T2DDIR',this)">Tier-2 Storage
+              Location</label><input type="text" validate="true" class="configinput inputdirectory" id="T2DDIR" oninput="validateconfigform('storagetier2configurationdiv')" pattern="^/.+" required></div>
+                    <br><br>
+                    <div>
+                        <label class="configlabel" onclick="showconfigurationhelp(event, 'T2DDIRENABLED0',this)">Enabled</label>
+                        <table>
+                            <tr>
+                                <td class="configinput" id="T2DDIRENABLED">
+                                    <input class="firstradio" type="radio" name="T2DDIRENABLED" id="T2DDIRENABLED0" value="0" onchange="ifcheckedenablevrequired('T2DDIRENABLED0','T2DDIR',false,true,'storagetier2configurationdiv');">Off
+                                    <input type="radio" name="T2DDIRENABLED" id="T2DDIRENABLED1" value="1" onchange="ifcheckedenablevrequired('T2DDIRENABLED0','T2DDIR',false,true,'storagetier2configurationdiv')">On
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <br><br>
+                    <div><label class="configlabel" style="cursor: pointer;" id="showadvancedstoragetier2configurationdiv" onclick="toggleadvancedsection('showadvancedstoragetier2configurationdiv','advancedstoragetier2configurationdiv','visibleadvancedstoragetier2configurationdiv','hiddenadvancedstoragetier2configurationdiv')">Show
+              Advanced Settings</label></div>
+                    <div id="visibleadvancedstoragetier2configurationdiv"></div>
+                    <br><br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestoragetier2configurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storagetier2configurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstoragetier2configurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storagetier2configurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div id="hiddenadvancedstoragetier2configurationdiv" class="hidden">
+                        <div id="advancedstoragetier2configurationdiv">
+                            <br>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T2LOWWATERMARK',this)">Low
+                  Watermark %
+                </label><input type="number" validate="true" class="configinput" id="T2LOWWATERMARK" oninput="validateconfigform('storagetier2configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T2HIGHWATERMARK',this)">High
+                  Watermark %
+                </label><input type="number" validate="true" class="configinput" id="T2HIGHWATERMARK" oninput="validateconfigform('storagetier2configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSTIER2LASTWRITTEN',this)">Datapart Lifecycle Last Written
+                  Seconds
+                </label><input type="number" validate="true" class="configinput" id="NEXFSTIER2LASTWRITTEN" oninput="validateconfigform('storagetier2configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSTIER2LASTACCESSED',this)">Datapart Lifecycle Last Accessed
+                  Seconds
+                </label><input type="number" validate="true" class="configinput" id="NEXFSTIER2LASTACCESSED" oninput="validateconfigform('storagetier2configurationdiv')" required></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="storagetier3configurationdiv" name="storagetier3configuration" class="sublevel2paneldiv storageconfigurationtabdiv">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storagetier3configurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Tier-3 Compatible S3 Cloud or Object Storage</div>
+                    &nbsp;<br>&nbsp;<br>&nbsp;<br>
+                    <div id="t3enabled"><label class="switchlabel" onclick="showconfigurationhelp(event, 'T3DDIRENABLED',this)">Enable Tier3</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="T3DDIRENABLED"
+                oninput="validateconfigform('storagetier3configurationdiv')"><span class="slider round"></span></label>
+                    </div>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3URL',this)">Endpoint
+              URL</label><input type="text" validate="true" class="configinput inputwide" id="T3S3URL" oninput="validateconfigform('storagetier3configurationdiv')" pattern="^.+" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3BUCKET',this)">Bucket</label><input type="text" validate="true" class="configinput" id="T3S3BUCKET" oninput="validateconfigform('storagetier3configurationdiv')"
+                            pattern="^.+$" required></div>
+                    <br>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3AWSAccessKeyId',this)">Access Key
+              ID</label><input type="text" validate="true" class="configinput" id="T3AWSAccessKeyId" oninput="validateconfigform('storagetier3configurationdiv')" pattern="^.+$" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3AWSSecretAccessKey',this)">Secret
+              Access Key</label><input type="text" validate="true" class="configinput" id="T3AWSSecretAccessKey" oninput="validateconfigform('storagetier3configurationdiv')" pattern="^.+$" required></div>
+                    <br>
+                    <div>
+                        <label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3SIGNATUREV40',this)">Use AWS Version 4
+              Signatures</label>
+                        <table>
+                            <tr>
+                                <td class="configinput" id="T3S3SIGNATUREV4">
+                                    <input type="radio" name="T3S3SIGNATUREV4" id="T3S3SIGNATUREV41" value="1" onchange="validateconfigform('storagetier3configurationdiv');">Version 4
+                                    <input class="firstradio" type="radio" name="T3S3SIGNATUREV4" id="T3S3SIGNATUREV40" value="0" onchange="validateconfigform('storagetier3configurationdiv');">Version 2
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <br><br>
+                    <div>
+                        <label class="configlabel" onclick="showconfigurationhelp(event, 'T3USEHTTPS',this)">Use Https</label>
+                        <table>
+                            <tr>
+                                <td class="configinput" id="T3USEHTTPS">
+                                    <input type="radio" name="T3USEHTTPS" id="T3USEHTTPS1" value="1" onchange="if (getElementById('T3S3PORT').value == '80') {getElementById('T3S3PORT').value = '443'}; validateconfigform('storagetier3configurationdiv');">Https
+                                    <input class="firstradio" type="radio" name="T3USEHTTPS" id="T3USEHTTPS0" value="0" onchange="if (getElementById('T3S3PORT').value == '443') {getElementById('T3S3PORT').value = '80'}; validateconfigform('storagetier3configurationdiv')">Http
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3PORT',this)">Endpoint
+              Port</label><input type="number" validate="true" class="configinput" id="T3S3PORT" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                    <br>
+                    <br>
+                    <div>
+                        <label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3ENABLEREGION0',this)">Include
+              Region</label>
+                        <table>
+                            <tr>
+                                <td class="configinput" id="T3S3ENABLEREGION">
+                                    <input type="radio" name="T3S3ENABLEREGION" id="T3S3ENABLEREGION1" value="1" onchange="ifcheckedenablevrequired('T3S3ENABLEREGION0','T3S3REGION',false,true,'storagetier3configurationdiv')">Yes
+                                    <input class="firstradio" type="radio" name="T3S3ENABLEREGION" id="T3S3ENABLEREGION0" value="0" onchange="ifcheckedenablevrequired('T3S3ENABLEREGION0','T3S3REGION',false,true,'storagetier3configurationdiv');">No
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3REGION',this)">Region</label><input type="text" validate="true" class="configinput inputdirectory" id="T3S3REGION" oninput="validateconfigform('storagetier3configurationdiv')"
+                            pattern="^.+" required></div>
+                    <br>
+                    <br>
+                    <div><label class="configlabel" style="cursor: pointer;" id="showadvancedstoragetier3configurationdiv" onclick="toggleadvancedsection('showadvancedstoragetier3configurationdiv','advancedstoragetier3configurationdiv','visibleadvancedstoragetier3configurationdiv','hiddenadvancedstoragetier3configurationdiv')">Show
+              Advanced Settings</label></div>
+                    <div id="visibleadvancedstoragetier3configurationdiv"></div>
+                    <br><br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestoragetier3configurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storagetier3configurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstoragetier3configurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storagetier3configurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div id="hiddenadvancedstoragetier3configurationdiv" class="hidden">
+                        <div id="advancedstoragetier3configurationdiv">
+                            <br>
+                            <br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3COMPRESSIONMODE0',this)">Compression
+                  Mode</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3COMPRESSIONMODE">
+                                            <input class="firstradio" type="radio" name="T3COMPRESSIONMODE" id="T3COMPRESSIONMODE0" value="0" onchange="validateconfigform('storagetier3configurationdiv')">None
+                                            <input type="radio" name="T3COMPRESSIONMODE" id="T3COMPRESSIONMODE1" value="1" onchange="validateconfigform('storagetier3configurationdiv')">zLib
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3COMPRESSIONLEVEL',this)">Compression Level</label><input type="number" validate="true" class="configinput" id="T3COMPRESSIONLEVEL" oninput="validateconfigform('storagetier3configurationdiv')"
+                                    pattern="^[0-9]$" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3COMPRESSIONMINPERCENT',this)">Compression Min
+                  Percentage</label><input type="number" validate="true" class="configinput" id="T3COMPRESSIONMINPERCENT" oninput="validateconfigform('storagetier3configurationdiv')" required>
+                            </div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3COMPRESSIONMINCHUNKDATABYTES',this)">Compression Min
+                  Size</label><input type="number" validate="true" class="configinput" id="T3COMPRESSIONMINCHUNKDATABYTES" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                            <br><br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3ENABLEMD5DIGEST0',this)">Enable
+                  Request MD5 Digest</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3S3ENABLEMD5DIGEST">
+                                            <input class="firstradio" type="radio" name="T3S3ENABLEMD5DIGEST" id="T3S3ENABLEMD5DIGEST0" value="0" onchange="validateconfigform('storagetier3configurationdiv')">No
+                                            <input type="radio" name="T3S3ENABLEMD5DIGEST" id="T3S3ENABLEMD5DIGEST1" value="1" onchange="validateconfigform('storagetier3configurationdiv')">Yes
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3USEVIRTUALHOST',this)">Use AWS
+                  Virtual Host Style URLs</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3S3USEVIRTUALHOST">
+                                            <input class="firstradio" type="radio" name="T3S3USEVIRTUALHOST" id="T3S3USEVIRTUALHOST0" value="0" onchange="validateconfigform('storagetier3configurationdiv')">No
+                                            <input type="radio" name="T3S3USEVIRTUALHOST" id="T3S3USEVIRTUALHOST1" value="1" onchange="validateconfigform('storagetier3configurationdiv')">Yes
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3COMPATIBLE0',this)">S3 Compatible
+                  Mode</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3S3COMPATIBLE">
+                                            <input class="firstradio" type="radio" name="T3S3COMPATIBLE" id="T3S3COMPATIBLE0" value="0" onchange="validateconfigform('storagetier3configurationdiv')">No
+                                            <input type="radio" name="T3S3COMPATIBLE" id="T3S3COMPATIBLE1" value="1" onchange="validateconfigform('storagetier3configurationdiv')">Yes
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3COMPAREETAG0',this)">Compare eTag
+                  before migration</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3COMPAREETAG">
+                                            <input class="firstradio" type="radio" name="T3COMPAREETAG" id="T3COMPAREETAG0" value="0" onchange="validateconfigform('storagetier3configurationdiv')">No
+                                            <input type="radio" name="T3COMPAREETAG" id="T3COMPAREETAG1" value="1" onchange="validateconfigform('storagetier3configurationdiv')">Yes
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br><br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3RETRY4040',this)">Retry
+                  404s</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3S3RETRY404">
+                                            <input class="firstradio" type="radio" name="T3S3RETRY404" id="T3S3RETRY4040" value="0" onchange="validateconfigform('storagetier3configurationdiv')">No
+                                            <input type="radio" name="T3S3RETRY404" id="T3S3RETRY4041" value="1" onchange="validateconfigform('storagetier3configurationdiv')">Yes
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3RETRY404SLEEP',this)">Wait
+                  Seconds between 404 Retries</label><input type="number" validate="true" class="configinput" id="T3S3RETRY404SLEEP" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3RETRIES',this)">Number of
+                  Request Retires to Attempt</label><input type="number" validate="true" class="configinput" id="T3S3RETRIES" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3RETRYSLEEP',this)">Wait Seconds
+                  between Request Retires</label><input type="number" validate="true" class="configinput" id="T3S3RETRYSLEEP" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3MAXCONNECTTIMEOUT',this)">
+                  Inital Connection Timeout</label><input type="number" validate="true" class="configinput" id="T3S3MAXCONNECTTIMEOUT" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                            <br>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3MAXREQTIME',this)">Maximum
+                  Request Time Allowed</label><input type="number" validate="true" class="configinput" id="T3S3MAXREQTIME" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="servicesconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                <div class="toplevel2menutab">
+                    <button name="servicemanagement" id="servicemanagement" class="toplevel2menutablinks active" onclick="changetoplevel2menuselected(event)">Service Management</button>
+                    <button name="scheduledmigrations" class="toplevel2menutablinks" onclick="changetoplevel2menuselected(event)">Scheduled Migrations<button>
+              <button name="deletionsandtruncations" class="toplevel2menutablinks"
+                onclick="changetoplevel2menuselected(event)">Deletions and Truncations</button>
+                    <button name="jobscheduler" class="toplevel2menutablinks" onclick="changetoplevel2menuselected(event)">Job
+                Scheduler</button>
+                </div>
+
+                <div id="storageservicemanagementconfigurationdiv" name="storageservicemanagementconfiguration" class="sublevel2paneldiv storageconfigurationtabdiv" style="display: inherit;">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storageservicemanagementconfigurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Service Management</div>
+                    &nbsp;<br>&nbsp;<br>&nbsp;<br>
+                    <div id="pausenexfs"><label class="switchlabel" onclick="showconfigurationhelp(event, 'NEXFSPAUSED',this)">Pause Nexfs</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="NEXFSPAUSED"
+                oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
+                class="slider round"></span></label>
+                    </div>
+                    <div id="enableiscsi"><label class="switchlabel" onclick="showconfigurationhelp(event, 'ISCSIENABLED',this)">Enable iSCSI</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="ISCSIENABLED"
+                oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
+                class="slider round"></span></label>
+                    </div>
+                    <div id="enablenfs"><label class="switchlabel" onclick="showconfigurationhelp(event, 'NFSENABLED',this)">NFS
+              Export Mgmt</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="NFSENABLED"
+                oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
+                class="slider round"></span></label>
+                    </div>
+                    <div id="managenfs"><label class="switchlabel" onclick="showconfigurationhelp(event, 'NFSSTARTSTOP',this)">NFS
+              Start/Stop</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="NFSSTARTSTOP"
+                oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
+                class="slider round"></span></label>
+                    </div>
+                    <br>
+                    <label>Allow a few minutes for service changes to take effect</label>
+                    <br>
+                    <br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestorageservicemanagementconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storageservicemanagementconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstorageservicemanagementconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storageservicemanagementconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="storagescheduledmigrationsconfigurationdiv" name="storagescheduledmigrationconfiguration" class="sublevel2paneldiv storageconfigurationtabdiv">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storagescheduledmigrationsconfigurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Scheduled (BG) Migrations Configuration</div>
+                    &nbsp;<br><br>
+                    <div id="pausebgmigrations"><label class="switchlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONSPAUSED',this)">Pause Scheduled Migrations</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="BGMIGRATIONSPAUSED"
+                oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')"><span class="slider round"
+                style="left: 300px"></span></label>
+                    </div>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONSTARTWINDOW',this)">Migration Window Start
+              Time</label><input type="time" validate="true" class="configinput" id="BGMIGRATIONSTARTWINDOW" oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONENDWINDOW',this)">Migration
+              Window End Time</label><input type="time" validate="true" class="configinput" id="BGMIGRATIONENDWINDOW" oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONT1FLOOR',this)">Tier-1
+              Migrations Floor %</label><input type="number" validate="true" class="configinput" id="BGMIGRATIONT1FLOOR" oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONT2FLOOR',this)">Tier-2
+              Migrations Floor %</label><input type="number" validate="true" class="configinput" id="BGMIGRATIONT2FLOOR" oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONSLEEPMS',this)">Next
+              Migration Job Wait (Milliseconds)</label><input type="number" validate="true" class="configinput" id="BGMIGRATIONSLEEPMS" oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'BGMIGRATIONMAXTHREADS',this)">Migration
+              Threads*</label><input type="number" validate="true" class="configinput" id="BGMIGRATIONMAXTHREADS" oninput="validateconfigform('storagescheduledmigrationsconfigurationdiv')" required></div>
+                    <br><br>
+                    <div class="configlabel">* next to a setting indicates that any value change will take affect on Nexfs server restart
+                    </div>
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestoragescheduledmigrationsconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storagescheduledmigrationsconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstoragescheduledmigrationsconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storagescheduledmigrationsconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div id="storagedeletionsandtruncationsconfigurationdiv" name="storagedeletionsandtruncationsconfiguration" class="sublevel2paneldiv storageconfigurationtabdiv">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storagedeletionsandtruncationsconfigurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Nexfs Deletions and Truncations Configuration</div>
+                    &nbsp;<br><br>
+                    <div id="pausebgdeletions"><label class="switchlabel" onclick="showconfigurationhelp(event, 'DELETEPAUSED',this)">Pause Scheduled Deletions</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="DELETEPAUSED"
+                oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')"><span
+                class="slider round" style="left: 300px"></span></label>
+                    </div>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETESTARTWINDOW',this)">Deletions
+              Window Start Time</label><input type="time" validate="true" class="configinput" id="DELETESTARTWINDOW" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETEENDWINDOW',this)">Deletions
+              Window End Time</label><input type="time" validate="true" class="configinput" id="DELETEENDWINDOW" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETERETAINDAYS',this)">Days to Retain
+              Deleted Files </label><input type="number" validate="true" class="configinput" id="DELETERETAINDAYS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
+                    <br>
+                    <br>
+                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'TRUNCTATE0ASDELETE',this)">Truncations as Deletions</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="TRUNCTATE0ASDELETE"
+                oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')"><span
+                class="slider round" style="left: 300px"></span></label>
+                    </div>
+                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'DELETEMOVETOTIER3',this)">Move Deletes to Tier-3</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="DELETEMOVETOTIER3"
+                oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')"><span
+                class="slider round" style="left: 300px"></span></label>
+                    </div>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETESLEEPMS',this)">Millisecs
+              Between Background Deletions</label><input type="number" validate="true" class="configinput" id="DELETESLEEPMS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required>
+                    </div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETEMAXTHREADS',this)">Background
+              Deletion Threads*</label><input type="number" validate="true" class="configinput" id="DELETEMAXTHREADS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
+                    <br>
+                    <br>
+                    <div id="harddeletions"><label class="switchlabel" onclick="showconfigurationhelp(event, 'ENABLEHARDDELETE',this)">Enable Hard Deletes*</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="ENABLEHARDDELETE"
+                oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')"><span
+                class="slider round" style="left: 300px"></span></label>
+                    </div>
+                    <div class="configlabel">* next to a setting indicates that any value change will take affect on Nexfs server restart
+                    </div>
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestoragedeletionsandtruncationsconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storagedeletionsandtruncationsconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstoragedeletionsandtruncationsconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storagedeletionsandtruncationsconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="storagejobschedulerconfigurationdiv" name="storagejobschedulerconfiguration" class="sublevel2paneldiv storageconfigurationtabdiv">
+                    <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('storagejobschedulerconfigurationdiv');">
+                        <center>Refresh</center>
+                    </div>
+                    <div class="paneltitle">Jobscheduler Configuration</div>
+                    &nbsp;<br><br>
+                    <div id="pausejobscheduler"><label class="switchlabel" onclick="showconfigurationhelp(event, 'JOBSCHEDULARPAUSED',this)">Pause Job Scheduler</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="JOBSCHEDULARPAUSED"
+                oninput="validateconfigform('storagejobschedulerconfigurationdiv')"><span class="slider round"
+                style="left: 300px"></span></label>
+                    </div>
+                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'JOBSCHEDULARSALLOWMANUALWHENPAUSED',this)">Allow admin Jobs when
+              Paused</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="JOBSCHEDULARSALLOWMANUALWHENPAUSED"
+                oninput="validateconfigform('storagejobschedulerconfigurationdiv')"><span class="slider round"
+                style="left: 300px"></span></label>
+                    </div>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'JSMAXQUEUESIZE',this)">Job Scheduler
+              Queue Size*</label><input type="number" validate="true" class="configinput" id="JSMAXQUEUESIZE" oninput="validateconfigform('storagejobschedulerconfigurationdiv')" required></div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'JOBSCHEDULARSLEEP',this)">
+              Seconds Between Job Scheduler Runs</label><input type="number" validate="true" class="configinput" id="JOBSCHEDULARSLEEP" oninput="validateconfigform('storagejobschedulerconfigurationdiv')" required>
+                    </div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'JSMAXTHREADS',this)">Background
+              Threads*</label><input type="number" validate="true" class="configinput" id="JSMAXTHREADS" oninput="validateconfigform('storagejobschedulerconfigurationdiv')" required></div>
+                    <br>
+                    <br>
+                    <div class="configlabel">* next to a setting indicates that any value change will take affect on Nexfs server restart
+                    </div>
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatestoragejobschedulerconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('storagejobschedulerconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertstoragejobschedulerconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('storagejobschedulerconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div id="smartprotectandteirconfigurationdiv" class="subpaneldiv configurationtabdiv storageconfigurationtabdiv">
+
+                <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('smartprotectandteirconfigurationdiv');">
+                    <center>Refresh</center>
+                </div>
+                &nbsp;<br><br>
+                <div class="paneltitle">Smart Protect Configuration</div>
+                <br>
+                <div id="smartprotectenabled"><label class="switchlabel" onclick="showconfigurationhelp(event, 'SMARTPROTECTENABLED',this)">Smart Protect Enabled</label>
+                    <label class="switch"><input type="checkbox" class="configinput" id="SMARTPROTECTENABLED"
+              oninput="validateconfigform('smartprotectandteirconfigurationdiv')"><span class="slider round"
+              style="left: 300px"></span></label>
+                </div>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'SMARTPROTECT0',this)">SmartProtect
+            Mode</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="SMARTPROTECT">
+                                <input class="firstradio" type="radio" name="SMARTPROTECT" id="SMARTPROTECT0" value="0" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">Off
+                                <input type="radio" name="SMARTPROTECT" id="SMARTPROTECT1" value="1" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">File Close
+                                <input type="radio" name="SMARTPROTECT" id="SMARTPROTECT2" value="2" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">Part Close
+                                <input type="radio" name="SMARTPROTECT" id="SMARTPROTECT3" value="3" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">File & Part Close
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'SMARTPROTECTOPENFILECYCLE',this)">
+            SmartProtect Openfile Minutes </label><input type="number" validate="true" class="configinput" id="SMARTPROTECTOPENFILECYCLE" oninput="validateconfigform('smartprotectandteirconfigurationdiv')" required>
+                </div>
+                <br>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'SMARTPROTECTANDTIERONQUEUEFULL0',this)">Migration Queue Full Mode
+          </label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="SMARTPROTECTANDTIERONQUEUEFULL">
+                                <input class="firstradio" type="radio" name="SMARTPROTECTANDTIERONQUEUEFULL" id="SMARTPROTECTANDTIERONQUEUEFULL0" value="0" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">Wait
+                                <input type="radio" name="SMARTPROTECTANDTIERONQUEUEFULL" id="SMARTPROTECTANDTIERONQUEUEFULL1" value="1" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">Instant Migration
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br><br>
+                <div class="panellabel">Smart Tier Configuration</div>
+                &nbsp;<br><br>
+                <div id="smarttierenabled"><label class="switchlabel" onclick="showconfigurationhelp(event, 'SMARTTIERENABLED',this)">Smart Tier Enabled</label>
+                    <label class="switch"><input type="checkbox" class="configinput" id="SMARTTIERENABLED"
+              oninput="validateconfigform('smartprotectandteirconfigurationdiv')"><span class="slider round"
+              style="left: 300px"></span></label>
+                </div>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'SMARTTIER0',this)">SmartTier Mode</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="SMARTTIER">
+                                <input class="firstradio" type="radio" name="SMARTTIER" id="SMARTTIER0" value="0" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">Off
+                                <input type="radio" name="SMARTTIER" id="SMARTTIER1" value="1" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">File Close
+                                <input type="radio" name="SMARTTIER" id="SMARTTIER2" value="2" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">Part Close
+                                <input type="radio" name="SMARTTIER" id="SMARTTIER3" value="3" onchange="validateconfigform('smartprotectandteirconfigurationdiv')">File & Part Close
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'SMARTTIEROPENFILECYCLE',this)">
+            SmartTier Openfile Minutes </label><input type="number" validate="true" class="configinput" id="SMARTTIEROPENFILECYCLE" oninput="validateconfigform('smartprotectandteirconfigurationdiv')" required>
+                </div>
+
+
+                <br><br>
+                <table>
+                    <tr>
+                        <td>
+                            <div id="updatesmartprotectandteirconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('smartprotectandteirconfigurationdiv');">
+                                <center>Update</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="revertsmartprotectandteirconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('smartprotectandteirconfigurationdiv');">
+                                <center>Revert</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="securityconfigurationdiv" class="subpaneldiv configurationtabdiv storageconfigurationtabdiv">
+
+                <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('securityconfigurationdiv');">
+                    <center>Refresh</center>
+                </div>
+                &nbsp;<br><br>
+                <div class="paneltitle">Nexfscli Access Settings</div>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'SECURITYCMDGROUP',this)">
+            Command Access Group</label><input type="number" validate="true" class="configinput" id="SECURITYCMDGROUP" oninput="validateconfigform('securityconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'SECURITYCMDGROUPACCESS0',this)">Command
+            Group
+            Access</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="SECURITYCMDGROUPACCESS">
+                                <input class="firstradio" type="radio" name="SECURITYCMDGROUPACCESS" id="SECURITYCMDGROUPACCESS0" value="0" onchange="validateconfigform('securityconfigurationdiv')">No Access
+                                <input type="radio" name="SECURITYCMDGROUPACCESS" id="SECURITYCMDGROUPACCESS1" value="1" onchange="validateconfigform('securityconfigurationdiv')">Read-Only
+                                <input type="radio" name="SECURITYCMDGROUPACCESS" id="SECURITYCMDGROUPACCESS2" value="2" onchange="validateconfigform('securityconfigurationdiv')">Read-Write
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'SECURITYCONFGROUP',this)">
+            Configuration Access Group</label><input type="number" validate="true" class="configinput" id="SECURITYCONFGROUP" oninput="validateconfigform('securityconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'SECURITYCONFGROUPACCESS0',this)">Configuration
+            Group Access</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="SECURITYCONFGROUPACCESS">
+                                <input class="firstradio" type="radio" name="SECURITYCONFGROUPACCESS" id="SECURITYCONFGROUPACCESS0" value="0" onchange="validateconfigform('securityconfigurationdiv')">No Access
+                                <input type="radio" name="SECURITYCONFGROUPACCESS" id="SECURITYCONFGROUPACCESS1" value="1" onchange="validateconfigform('securityconfigurationdiv')">Read-Only
+                                <input type="radio" name="SECURITYCONFGROUPACCESS" id="SECURITYCONFGROUPACCESS2" value="2" onchange="validateconfigform('securityconfigurationdiv')">Read-Write
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <br>
+                <div class="panellabel">Fuse Access Settings</div>
+                <br>
+                <br>
+                <div id="enforceposixacls"><label class="switchlabel" onclick="showconfigurationhelp(event, 'ENFORCEPOSIXACLS',this)">Enforce POSIX ALCs</label>
+                    <label class="switch"><input type="checkbox" class="configinput" id="ENFORCEPOSIXACLS"
+              oninput="validateconfigform('securityconfigurationdiv')"><span class="slider round"
+              style="left: 300px"></span></label>
+                </div>
+                <div id="rootonlyaccess"><label class="switchlabel" onclick="showconfigurationhelp(event, 'ROOTONLYACCESS',this)">Root Only Access*</label>
+                    <label class="switch"><input type="checkbox" class="configinput" id="ROOTONLYACCESS"
+              oninput="validateconfigform('securityconfigurationdiv')"><span class="slider round"
+              style="left: 300px"></span></label>
+                </div>
+                <div class="configlabel">* next to a setting indicates that any value change will take affect on Nexfs server restart
+                </div>
+                <br>
+                <br>
+                <table>
+                    <tr>
+                        <td>
+                            <div id="updatesecurityconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('securityconfigurationdiv');">
+                                <center>Update</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="revertsecurityconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('securityconfigurationdiv');">
+                                <center>Revert</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="logalertconfigurationdiv" class="subpaneldiv configurationtabdiv storageconfigurationtabdiv">
+                <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('logalertconfigurationdiv');">
+                    <center>Refresh</center>
+                </div>
+                &nbsp;<br><br>
+                <div class="paneltitle">Syslog Settings</div>
+                <div id="gfsloglevel"><label class="switchlabel" onclick="showconfigurationhelp(event, 'GFSLOGLEVEL',this)">Log
+            Level</label>
+                    <select class="configinput" id="GFSLOGLEVEL" oninput="validateconfigform('logalertconfigurationdiv')" required>
+            <option value="CRIT">Critical</option>
+            <option value="ERR">Error</option>
+            <option value="WARNING">Warning</option>
+            <option value="NOTICE">Notice</option>
+            <option value="INFO">Informative</option>
+            <option value="DEBUG">Debug</option>
+          </select>
+                </div>
+                <br>
+                <div id="syslogfacility"><label class="switchlabel" onclick="showconfigurationhelp(event, 'SYSLOGFACILITY',this)">Syslog Facility</label>
+                    <select class="configinput" id="SYSLOGFACILITY" oninput="validateconfigform('logalertconfigurationdiv')" required>
+            <option value="LOG_USER">User</option>
+            <option value="LOG_LOCAL0">Local0</option>
+            <option value="LOG_LOCAL1">Local1</option>
+            <option value="LOG_LOCAL2">Local2</option>
+            <option value="LOG_LOCAL3">Local3</option>
+            <option value="LOG_LOCAL4">Local4</option>
+            <option value="LOG_LOCAL5">Local5</option>
+            <option value="LOG_LOCAL6">Local6</option>
+            <option value="LOG_LOCAL7">Local7</option>
+          </select>
+                </div>
+                <div class="paneltitle snmptrapsettingslabel">SNMP Trap Settings</div>
+                <br><br>
+                <div class="snmptrapenabled">
+                    <label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPENABLED',this)">Send SNMP Traps</label>
+                    <table>
+                        <tr>
+                            <td class="configinput snmptapconfiginput" id="SNMPTRAPENABLED">
+                                <input class="firstradio" type="radio" name="SNMPTRAPENABLED" id="SNMPTRAPENABLED0" value="0" onchange="validateconfigform('logalertconfigurationdiv')">Disabled
+                                <input type="radio" name="SNMPTRAPENABLED" id="SNMPTRAPENABLED1" value="1" onchange="validateconfigform('logalertconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="snmptrapversion" class="snmptrapversion"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPVERSION',this)">SNMP Version</label>
+                    <select class="configinput" id="SNMPTRAPVERSION" oninput="validateconfigform('logalertconfigurationdiv')">
+                <option value="2" selected>2c</option>
+                <option value="3">3</option>
+              </select>
+                </div>
+                <div class="snmptrapcommunity"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPCOMMUNITY',this)">SNMP Trap Community
+            </label><input type="text" class="configinput" id="SNMPTRAPCOMMUNITY" oninput="validateconfigform('logalertconfigurationdiv')">
+                </div>
+                <div class="snmptrapagents"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPAGENTS',this)">SNMP Trap Agents (Targets)
+            </label><input type="text" class="configinput" id="SNMPTRAPAGENTS" oninput="validateconfigform('logalertconfigurationdiv')">
+                </div>
+
+                <div id="snmptrapv3authprotocol" class="snmptrapv3authprotocol"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3AUTHPROTOCOL',this)">SNMPv3 Authenication Protocol</label>
+                    <select class="configinput" id="SNMPTRAPV3AUTHPROTOCOL" oninput="validateconfigform('logalertconfigurationdiv')">
+                    <option value="0">None</option>
+                    <option value="1">MD5</option>
+                    <option value="2">SHA</option>
+                    <option value="3">SHA-512</option>
+                    <option value="4">SHA-384</option>
+                    <option value="5">SHA-256</option>
+                    <option value="6">SHA-224</option>
+                </select>
+                </div>
+                <div class="snmptrapv3authpassword"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3AUTHPASSWORD',this)">SNMPv3 Authenication Password
+            </label><input type="text" class="configinput" id="SNMPTRAPV3AUTHPASSWORD" maxlength="32" oninput="validateconfigform('logalertconfigurationdiv')">
+                </div>
+                <div class="snmptrapv3contextengineid"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3CONTEXTENGINEID',this)">SNMPv3 Context Engine ID
+            </label><input type="text" class="configinput" id="SNMPTRAPV3CONTEXTENGINEID" maxlength="254" oninput="validateconfigform('logalertconfigurationdiv')">
+                </div>
+                <div class="snmptrapv3securityname"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3SECURITYNAME',this)">SNMPv3 Security Name 
+            </label><input type="text" class="configinput" id="SNMPTRAPV3SECURITYNAME" maxlength="254" oninput="validateconfigform('logalertconfigurationdiv')">
+                </div>
+                <div class="snmptrapv3privacyprotocol">
+                    <label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3PRIVACYPROTOCOL',this)">SNMPv3 Privacy Protocol</label>
+                    <table>
+                        <tr>
+                            <td class="configinput snmptapconfiginput" id="SNMPTRAPV3PRIVACYPROTOCOL">
+                                <input class="firstradio" type="radio" name="SNMPTRAPV3PRIVACYPROTOCOL" id="SNMPTRAPV3PRIVACYPROTOCOL0" value="0" onchange="validateconfigform('logalertconfigurationdiv')">DES
+                                <input type="radio" name="SNMPTRAPV3PRIVACYPROTOCOL" id="SNMPTRAPV3PRIVACYPROTOCOL1" value="1" onchange="validateconfigform('logalertconfigurationdiv')" selected>AES
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="snmptrapv3privacypassword"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3PRIVACYPASSWORD',this)">SNMPv3 Privacy Password 
+            </label><input type="text" class="configinput" id="SNMPTRAPV3PRIVACYPASSWORD" maxlength="32" oninput="validateconfigform('logalertconfigurationdiv')">
+                </div>
+                <div id="snmptrapv3securitylevel" class="snmptrapv3securitylevel"><label class="snmplabel" onclick="showconfigurationhelp(event, 'SNMPTRAPV3SECURITYLEVEL',this)">SNMPv3 Security Level</label>
+                    <select class="configinput" id="SNMPTRAPV3SECURITYLEVEL" oninput="validateconfigform('logalertconfigurationdiv')">
+                    <option value="0">noAuthNoPriv</option>
+                    <option value="1">authNoPriv</option>
+                    <option value="2">authPriv</option>
+                </select>
+                </div>
+                <br>
+                <br>
+                <div class="updatelogalertconfiguration">
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updatelogalertconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('logalertconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertlogalertconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('logalertconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="advancedconfigurationdiv" class="subpaneldiv configurationtabdiv storageconfigurationtabdiv" style="line-height: 1.8;">
+                <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('advancedconfigurationdiv');">
+                    <center>Refresh</center>
+                </div>
+                &nbsp;<br><br>
+                <div class="paneltitle">Advanced Settings</div>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MOUNTPOINT',this)">Nexfs Fuse Mountpoint
+          </label><input type="text" validate="true" class="configinput inputdirectory" id="MOUNTPOINT" oninput="validateconfigform('advancedconfigurationdiv')" pattern="^/.+" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'BUFFERCHUNKONREAD0',this)">Buffer Chunk on
+            Read</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="BUFFERCHUNKONREAD">
+                                <input class="firstradio" type="radio" name="BUFFERCHUNKONREAD" id="BUFFERCHUNKONREAD0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">No
+                                <input type="radio" name="BUFFERCHUNKONREAD" id="BUFFERCHUNKONREAD1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Yes
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CACHELOCKWAIT',this)">Cache Lock Wait
+            (nanosecs)
+          </label><input type="number" validate="true" class="configinput" id="CACHELOCKWAIT" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'CTIMEISREQTIME0',this)">CTIME Returns
+            Request
+            Time</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="CTIMEISREQTIME">
+                                <input class="firstradio" type="radio" name="CTIMEISREQTIME" id="CTIMEISREQTIME0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">No
+                                <input type="radio" name="CTIMEISREQTIME" id="CTIMEISREQTIME1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Yes
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'DROPCACHEONOPEN0',this)">(Fuse) Drop cache
+            on
+            Open</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="DROPCACHEONOPEN">
+                                <input class="firstradio" type="radio" name="DROPCACHEONOPEN" id="DROPCACHEONOPEN0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">No
+                                <input type="radio" name="DROPCACHEONOPEN" id="DROPCACHEONOPEN1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Yes
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ATTRCACHEEXPIRY',this)">
+            (Fuse) Attribute Cache Expiry Seconds</label><input type="number" validate="true" class="configinput" id="ATTRCACHEEXPIRY" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'LOOKUPCACHEEXPIRY',this)">
+            (Fuse) Lookup Cache Expiry Seconds</label><input type="number" validate="true" class="configinput" id="LOOKUPCACHEEXPIRY" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'ENABLEWRITEBUFFERING0',this)">(Fuse) Write
+            Buffering</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="ENABLEWRITEBUFFERING">
+                                <input class="firstradio" type="radio" name="ENABLEWRITEBUFFERING" id="ENABLEWRITEBUFFERING0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="ENABLEWRITEBUFFERING" id="ENABLEWRITEBUFFERING1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MAXHANDLEPAGES',this)">
+            Maximum Openfile Handle Pages</label><input type="number" validate="true" class="configinput" id="MAXHANDLEPAGES" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MAXFILENAMELENGTH',this)">
+            Maximum Path+Filename Length</label><input type="number" validate="true" class="configinput" id="MAXFILENAMELENGTH" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSMAXOPENFILES',this)">Maximum Open
+            Files
+          </label><input type="number" validate="true" class="configinput" id="NEXFSMAXOPENFILES" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSCMD',this)">nexfs.server executable
+          </label><input type="text" validate="true" class="configinput inputdirectory" id="NEXFSCMD" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'PARTSIZE',this)">
+            Default Data Part Size</label><input type="number" validate="true" class="configinput" id="PARTSIZE" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'RETIERONREAD0',this)">Retier On Read</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="RETIERONREAD">
+                                <input class="firstradio" type="radio" name="RETIERONREAD" id="RETIERONREAD0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">No
+                                <input type="radio" name="RETIERONREAD" id="RETIERONREAD1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Yes
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+
+                <div id="retierorder"><label class="switchlabel" onclick="showconfigurationhelp(event, 'RETIERORDER',this)">Retier
+          Order</label>
+                    <select class="configinput" id="RETIERORDER" oninput="validateconfigform('advancedconfigurationdiv')" required>
+          <option value="0">Auto</option>
+          <option value="12">Tier1/Tier2</option>
+          <option value="21">Tier2/Tier1</option>
+        </select>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERENABLED',this)">API / MgmtWeb Server</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="MGMTWEBSERVERENABLED">
+                                <input class="firstradio" type="radio" name="MGMTWEBSERVERENABLED" id="MGMTWEBSERVERENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="MGMTWEBSERVERENABLED" id="MGMTWEBSERVERENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERPORT',this)">API / MgmtWeb Server Port 
+                      </label><input type="number" validate="true" class="configinput" id="MGMTWEBSERVERPORT" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBENABLECOUNTERS',this)">MgmtWeb Server Health Counters</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="MGMTWEBENABLECOUNTERS">
+                                <input class="firstradio" type="radio" name="MGMTWEBENABLECOUNTERS" id="MGMTWEBENABLECOUNTERS0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="MGMTWEBENABLECOUNTERS" id="MGMTWEBENABLECOUNTERS1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBENABLEHEALTHCHECK',this)">MgmtWeb Server Health Check Reporting</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="MGMTWEBENABLEHEALTHCHECK">
+                                <input class="firstradio" type="radio" name="MGMTWEBENABLEHEALTHCHECK" id="MGMTWEBENABLEHEALTHCHECK0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="MGMTWEBENABLEHEALTHCHECK" id="MGMTWEBENABLEHEALTHCHECK1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBENABLEHEALTHCHECKWARN',this)">MgmtWeb Health Check Report Warning</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="MGMTWEBENABLEHEALTHCHECKWARN">
+                                <input class="firstradio" type="radio" name="MGMTWEBENABLEHEALTHCHECKWARN" id="MGMTWEBENABLEHEALTHCHECKWARN0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="MGMTWEBENABLEHEALTHCHECKWARN" id="MGMTWEBENABLEHEALTHCHECKWARN1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBTOKENEXPIRY',this)">Mgmt Token Default Idle Timeout
+                    </label><input type="number" validate="true" class="configinput" id="MGMTWEBTOKENEXPIRY" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                    <br>
+                    <br>
+                    <br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="updateadvancedconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('advancedconfigurationdiv');">
+                                    <center>Update</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="revertadvancedconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('advancedconfigurationdiv');">
+                                    <center>Revert</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="nfsdiv" class="paneldiv">
+            <div class="paneltitle">NFS Exports Configuration</div>
+            <div class="nfsexportsdiv" id="nfsexportsdiv" nfsexportcount="0">
+
+            </div>
+            <div style="line-height: 1.5;">
+                <br><br><br><br>
+                <table>
+                    <tr>
+                        <td>
+                            <div id="nfsexportadd" class="button" style="left:50px;" onclick="nfsexportadd('defaults');">
+                                <center>Add Export</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="nfsexportsave" class="buttondisabled" style="left:50px;" onclick="savenfsexports();">
+                                <center>Save Exports</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="nfsexportrevert" class="buttondisabled" style="left:50px;" onclick="reloadnfsexports();">
+                                <center>Revert</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="showhelp" class="hidden" NFSClients="<b>Clients:</b><br><br>The NFS client who can access the export.<br>Can be a single host, netgroup, or IP networks, wildcards for client names are supported. Exports man page 5 documents valid formats as:<br><br>Single Host<br>&emsp;You may specify a host either by an abbreviated name recognized be the resolver, the fully qualified domain name, an IPv4 address, or an IPv6 address. IPv6 addresses must not be inside square brackets in /etc/exports lest they be confused with character-class wildcard matches.<br><br>Netgroups<br>&emsp;NIS netgroups may be given as @group. Only the host part of each netgroup members is consider in checking for membership. Empty host parts or those containing a single dash (-) are ignored.<br><br> Wildcards<br>&emsp;Machine names may contain the wildcard characters * and ?, or may contain character class lists within [square brackets]. This can be used to make the exports file more compact; for instance, *.cs.foo.edu matches all hosts in the domain cs.foo.edu. As these characters also match the dots in a domain name, the given pattern will also match all hosts within any subdomain of cs.foo.edu.<br><br>IP networks<br>&emsp;You can also export directories to all hosts on an IP (sub-) network simultaneously. This is done by specifying an IP address and netmask pair as address/netmask where the netmask can be specified in dotted-decimal format, or as a contiguous mask length. For example, either '/255.255.252.0' or '/22' appended to the network base IPv4 address results in identical subnetworks with 10 bits of host. IPv6 addresses must use a contiguous mask length and must not be inside square brackets to avoid confusion with character-class wildcards. Wildcard characters generally do not work on IP addresses, though they may work by accident when reverse DNS lookups fail."
+            NFSAccess="<b>Access:</b><br><br>If the export should be exported Read-Write or Read-Only" NFSMappings="<b>Mappings:</b><br><br><b>AnonymousUID</b><br><br>Explicitly set the uid of the anonymous account<br><br><b>AnonymousGID</b><br><br>Explicitly set the gid of the anonymous account<br><br><b>SquashMode</b><br><br><i>root_squash</i><br><br>Map requests from uid/gid 0 to the anonymous uid/gid. Note that this does not apply to any other uids or gids that might be equally sensitive, such as user bin or group staff<br><br><i>no_root_squash</i><br><br>Turn off root squashing<br><br><i>all_squash</i><br><br>Map all uids and gids to the anonymous user. Useful for NFS-exported public FTP directories, news spool directories, etc"
+            NFSSecurity="<b>Security:</b><br><br>sys (Default)<br>&emsp;Basic Linux host system security (no cryptographic security)<br><br>krb5<br>&emsp;The export supports krb5 security  (authentication only)<br><br>krb5i<br>&emsp;The export supports krb5i security  (integrity protection)<br><br>krb5p<br>&emsp;The export supports krb5p security  (privacy protection)"
+            NFSAdvanced="<b>Advanced:</b><br><br>Subtree Check<br>&emsp;Enables or disables subtree checking. The system must check a subdirectory of the filesystem exported, but when the whole filesystem is not export for each NFS request, the server must check not only that the accessed file is in the appropriate filesystem (which is easy) but also that it is in the exported tree (which is harder)<br><br>Secure Locks<br>&emsp;When not set the NFS server is not required to enforce authentication of locking requests. Normally the NFS server will require a lock request to hold a credential for a user who has read access to the file. Without this set those access checks will not be performed.<br><br>No wdelay<br>&emsp;When enabled performance can improve by allowing the NFS server to send multiple related write requests to Nexfs in a single operation, but performance can also be reduced if the NFS server receives small unrelated write requests.  Note: async must also be disabled on the export for this feature to activate<br><br>Async<br>&emsp;This option allows the NFS server to reply to requests before change have been committed to storage. Using this option may improve performance, but can cause data to be lost or corrupted if the server is uncleanly restarted or crashed<br><br>Export Enabled<br>&emsp;Make the export available for clients to mount"
+            iSCSIInterfaces="<b>Interfaces:</b><br><br>The IP Address (or resolvable dns name) of a system network interface that the iSCSI subsystem can attach to (interfaces configured here must be attached to iscsi targets)" iSCSIPort="<b>Port:</b><br><br>The network port number to listen on, default: 3260"
+            iSCSIDelete="<b>Delete:</b><br><br><br>Select to delete the corresponding entry">
+        </div>
+
+        <div id="showhelpdiv" class="showhelp hidden">
+            <div>Nexfs Admin Console Help<br><br></div>
+            <div id="showhelptext" class="nexfsexpothelptext"></div>
+            <div class="centerbuttondiv"><br><input type="button" size="30px" value="Close" onclick="closeshowhelp()">
+            </div>
+        </div>
+
+
+        <div id="folderinfodiv" class="folderinfo hidden">
+            <div class="foldername folderinfolabel">Name</div>
+            <div class="foldername foldernamelabel"><input type="text" id="foldername" pattern="^[\\w,\\s-\\._\\+\\@\\%\\*]{1,254}$" placeholder="folder name" required onchange="validatefoldername();" onkeyup="validatefoldername();"></div>
+            <div class="folderowner folderinfolabel">Owner</div>
+            <div class="folderowner folderownerlabel"><input type="text" id="folderowner" placeholder="inherit"></div>
+            <div class="folderowner folderpermissions">
+                <table>
+                    <tr>
+                        <td>Read</td>
+                        <td><input type="checkbox" id="folderownerread" checked></td>
+                        <td>Write</td>
+                        <td><input type="checkbox" id="folderownerwrite" checked></td>
+                        <td>Open</td>
+                        <td><input type="checkbox" id="folderowneropen" checked></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="foldergroup folderinfolabel">Group</div>
+            <div class="foldergroup folderpermissions">
+                <table>
+                    <tr>
+                        <td>Read</td>
+                        <td><input type="checkbox" id="foldergroupread" checked></td>
+                        <td>Write</td>
+                        <td><input type="checkbox" id="foldergroupwrite" checked></td>
+                        <td>Open</td>
+                        <td><input type="checkbox" id="foldergroupopen" checked></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="foldergroup foldergrouplabel"><input type="text" id="foldergroup" placeholder="inherit"></div>
+            <div class="folderother folderinfolabel">Others</div>
+            <div class="folderother folderpermissions">
+                <table>
+                    <tr>
+                        <td>Read</td>
+                        <td><input type="checkbox" id="folderotherread"></td>
+                        <td>Write</td>
+                        <td><input type="checkbox" id="folderotherwrite"></td>
+                        <td>Open</td>
+                        <td><input type="checkbox" id="folderotheropen"></td>
+                    </tr>
+                </table>
+            </div>
+            <div style="left: 50px; top: 170px; position: absolute;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div id="savefolderbutton" class="buttondisabled" onclick="savefolder();">
+                                <center>Save</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="cancelfolderbutton" class="button" onclick="closefolderinfo();">
+                                <center>Cancel</center>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <input id="folderinfoparentfolder" class="hidden">
+            <input id="orgfoldername" class="hidden">
+        </div>
+
+        <div id="fileeditdiv" class="editfile hidden">
+            <div class="editfilename editfilelabel">Name</div>
+            <div class="editfilename editfilenamelabel"><input type="text" id="editfilename" pattern="^[\\w,\\s-\\._\\+\\@\\%\\*]{1,254}$" placeholder="file name" required onchange="validatefileedit();" onkeyup="validatefileedit();"></div>
+            <div class="editfilesize editfilelabel">Size</div>
+            <div class="editfilesize editfilesizelabel"><input type="number" id="editfilesize" value="0" min="0" required onchange="validatefileedit();" onkeyup="validatefileedit();"></div>
+            <div class="editfilesize editfilesizeunit"><select id="editfilesizeunit">
+          <option value="bytes">bytes</option>
+          <option value="kB">kB (1000s)</option>
+          <option value="mB">mB</option>
+          <option value="gB">gB</option>
+          <option value="tB">tB</option>
+        </select></div>
+            <div class="editfilechunksize editfilelabel">Chunk Size</div>
+            <div class="editfilechunksize editfilechunksizelabel"><input type="number" id="editfilechunksize" min="512000" max="8192000" step="512000" placeholder="default" onchange="if (getElementById('editfilechunksize').value.length == 0 ) {  getElementById('editfilechunksize').required=false; } else { getElementById('editfilechunksize').required=true;}; validatefileedit();"
+                    onkeyup="validatefileedit();"></div>
+            <div class="filesetdefaultchuckbutton"><input type="button" id="filesetdefaultchuckbutton" value="Use Default" onclick="getElementById('editfilechunksize').value=''; getElementById('editfilechunksize').required=false;">
+            </div>
+            <div class="editfilepermissionslabel editfilelabel" style="width:250px;">Basic Permissions</div>
+            <div class="editfileowner editfilelabel">Owner</div>
+            <div class="editfileowner editfileownerlabel"><input type="text" id="editfileowner" placeholder="inherit"></div>
+            <div class="editfileowner editfilepermissions">
+                <table>
+                    <tr>
+                        <td>Read</td>
+                        <td><input type="checkbox" id="editfileownerread" checked></td>
+                        <td>Write</td>
+                        <td><input type="checkbox" id="editfileownerwrite" checked></td>
+                        <td>Execute</td>
+                        <td><input type="checkbox" id="editfileownerexecute"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="editfilegroup editfilelabel">Group</div>
+            <div class="editfilegroup editfilepermissions">
+                <table>
+                    <tr>
+                        <td>Read</td>
+                        <td><input type="checkbox" id="editfilegroupread" checked></td>
+                        <td>Write</td>
+                        <td><input type="checkbox" id="editfilegroupwrite" checked></td>
+                        <td>Execute</td>
+                        <td><input type="checkbox" id="editfilegroupexecute"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="editfilegroup editfilegrouplabel"><input type="text" id="editfilegroup" placeholder="inherit"></div>
+            <div class="editfileother editfilelabel">Others</div>
+            <div class="editfileother editfilepermissions">
+                <table>
+                    <tr>
+                        <td>Read</td>
+                        <td><input type="checkbox" id="editfileotherread"></td>
+                        <td>Write</td>
+                        <td><input type="checkbox" id="editfileotherwrite"></td>
+                        <td>Execute</td>
+                        <td><input type="checkbox" id="editfileotherexecute"></td>
+                    </tr>
+                </table>
+            </div>
+            <div style="left: 50px; top: 260px; position: absolute;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div id="saveeditfilebutton" class="buttondisabled" onclick="saveeditfile();">
+                                <center>Save</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="canceleditfilebutton" class="button" onclick="closeeditfile();">
+                                <center>Cancel</center>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <input id="fileeditparentfolder" class="hidden">
+            <input id="orgeditfilename" class="hidden">
+        </div>
+
+        <div id="iamedituserdiv" class="iamedituser hidden">
+            <div class="iamedituserheading">Nexfs User Management</div>
+            <div class="iamedituserid iamedituserheading">User ID</div>
+            <div class="iamedituserid iamedituserinput">
+                <input type="text" size="32" id="iamedituserid" autocomplete="off" maxlength="63" required onchange="iameditvalidate('iamedituserid')">
+            </div>
+            <div class="iamedituserenabled iamedituserheading">Account Enabled</div>
+            <div class="iamedituserenabled iamedituserinput">
+                <input type="checkbox" id="iamedituserenabled" onchange="iameditvalidate('iamedituserenabled')">
+            </div>
+            <div class="iameditusername iamedituserheading">Name</div>
+            <div class="iameditusername iamedituserinput">
+                <input type="text" size="63" id="iameditusername" autocomplete="off" minlength="1" required onchange="iameditvalidate('iameditusername')">
+            </div>
+            <div class="iameditusersecret iamedituserheading">Secret</div>
+            <div class="iameditusersecret iamedituserinput">
+                <input type="password" autocomplete="off" size="32" id="iameditusersecret" minlength="8" required onchange="iameditvalidate('iameditusersecret')">
+            </div>
+            <div class="iamedituseremail iamedituserheading">Email</div>
+            <div class="iamedituseremail iamedituserinput">
+                <input type="email" size=63 id="iamedituseremail" maxlength="255" onchange="iameditvalidate('iamedituseremail')">
+            </div>
+            <div class="iamedituserdescription1 iamedituserheading">Account Descripton</div>
+            <div class="iamedituserdescription1 iamedituserinput">
+                <input type="text" size=63 id="iamedituserdescription1" maxlenght="255" onchange="iameditvalidate('iamedituserdescription1')">
+            </div>
+            <div class="iamedituserdescription2 iamedituserinput">
+                <input type="text" size=63 id="iamedituserdescription2" maxlenght="255" onchange="iameditvalidate('iamedituserdescription2')">
+            </div>
+            <div class="iamedituserauthenicationmethod iamedituserheading">Authenication Method</div>
+            <div class="iamedituserauthenicationmethod iamedituserinput">
+                <select id="iamedituserauthmethod" required onchange="iameditvalidate('iamedituserauthmethod')">
+                   <option value="0" selected>Nexfs</option>
+                </select>
+            </div>
+            <div class="iameditusermgmtroleselect iamedituserheading">Management Roles</div>
+            <div class="iameditusermgmtroleselect iamedituserinput">
+                <select id="iameditusermgmtroleselect" selectedcount="0" multiple>
+                </select>
+            </div>
+            <br>
+            <div style="left: 50px; top: 400px; position: relative;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div id="iamsaveuserbutton" class="buttondisabled" onclick="saveiamuser();">
+                                <center>Create</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="closeiamuser" class="button" onclick="closeiamuser();">
+                                <center>Cancel</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="iamdeleteuserbutton" class="buttondisabled" onclick="deleteiamuser();">
+                                <center>Delete</center>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <input class="hidden" id="orguserid">
+            <input class="hidden" id="userlistrow">
+        </div>
+
+        <div id="fileselectdiv" class="fileselect hidden">
+            <div class="fileselectcurrentfolderimg"><img src="/folderwhitefill.png"></div>
+            <div id="fileselectcurrenfolderdiv" class="fileselectinputdiv"><input id="fileselectcurrentfolder" readonly></div>
+            <div id="fileselectlist" class="fileselectlist">
+            </div>
+            <br>
+            <div style="left: 50px; position: relative;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div id="returnfileselected" class="buttondisabled" onclick="returnfileselect();">
+                                <center>Select</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="closefileselected" class="button" onclick="closefileselect();">
+                                <center>Cancel</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="createfileselect" class="button" onclick="createfileselect();">
+                                <center>New File</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="createdirectoryselect" class="button" onclick="createdirectoryselect();">
+                                <center>New Folder</center>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <input class="hidden" id="fileselecttargetid">
+            <input class="hidden" id="fileselectcurrentpath">
+            <input class="hidden" id="fileselectnextpath">
+            <input class="hidden" id="fileselectdepth">
+            <input class="hidden" id="fileselectedentry">
+            <input class="hidden" id="fileselectmode">
+            <div class="hidden" id="filepermissions" ListDirectories="0" ListFiles="0" CreateDirectories="0" CreateFiles="0">
+            </div>
+        </div>
+
+        <div id="iamdiv" class="paneldiv">
+            <div class="topmenutab">
+                <button name="iamsecretkey" id="iamsecretkeymenu" class="topmenutablinks active" onclick="changetopmenuselected(event,'iamdiv')">Secret Key</button>
+                <button name="iamaccounts" id="iamaccountsmenu" class="topmenutablinks" onclick="changetopmenuselected(event,'iamdiv')">Accounts</button>
+                <button name="iammgmtroles" id="iammgmtrolesmenu" class="topmenutablinks" onclick="changetopmenuselected(event,'iamdiv')">Management Roles</button>
+            </div>
+            <div id="iamsecretkeyconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
+                &nbsp;<br><br>
+                <div class="paneltitle">Change Secret Key</div>
+                <div id="iamsecretkey">
+                    <div id="updatesecretediv" class="updatesecretdiv">
+                        <div id="secretkeyinfo" class="secretkeyinfo" style="left:50px; top: 70px">
+                            <table>
+                                <tr>
+                                    <td class="changesecretheading">Current Secret Key:</td>
+                                    <td><input type="password" size="50px" id="currentsecretkey" onchange="validatechangesecretkey()"></td>
+                                </tr>
+                                <tr>
+                                    <td class="changesecretheading">New Secret Key:</td>
+                                    <td><input type="password" size="50px" minlength="8" id="newsecretkey" onchange="validatechangesecretkey()"></td>
+                                </tr>
+                                <tr>
+                                    <td class="changesecretheading">Re-Enter New Secret Key:</td>
+                                    <td><input type="password" size="50px" minlength="8" id="newsecretkey2" onchange="validatechangesecretkey()"></td>
+                                </tr>
+                                <tr id="secretnotmatch" class="hidden">
+                                    <td>New Secret Key values must match</td>
+                                </tr>
+                                <tr>
+                                    <td style="line-height:10px;" colspan=2>&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="cancelsecretupdate" class="buttondisabled" style="left:50px;" onclick="clearchangesecretkeyform()">
+                                            <center>Cancel</center>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div id="dosecretupdate" class="buttondisabled" style="left:50px;" onclick="uploadnewsecretkey()">
+                                            <center>Save</center>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="iamaccountsconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                &nbsp;<br><br>
+                <div class="paneltitle">Manage Nexfs IAM Accounts</div>
+                <div class="iamaccountsdiv" id="iamaccountsdiv" iamaccountcount="0">
+                    <table id="iamaccountlist">
+                        <tr id="iamaccountheader">
+                            <th>Edit</th>
+                            <th style="min-width: 120px;">User ID</th>
+                            <th style="min-width: 300px;">User Name</th>
+                            <th>Enabled</th>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <br>
+                <div style="line-height: 1.5;">
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="iamaccountadd" class="button" style="left:50px;" onclick="iamaccountadd();">
+                                    <center>Add</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iamaccountrevert" class="button" style="left:50px;" onclick="loadiamaccounts();">
+                                    <center>Refresh</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div class="hidden" id="useradminpermissions" GetUser="0">
+                </div>
+            </div>
+            <div id="iammgmtrolesconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                &nbsp;<br><br>
+                <div class="paneltitle">Manage Nexfs IAM Roles</div>
+                <div class="iammgmtrolesdiv" id="iammgmtrolesdiv" iammgmtrolecount="0">
+
+                </div>
+                <div style="line-height: 1.5;">
+                    <br><br><br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="iammgmtrolesadd" class="button" style="left:50px;" onclick="iammgmtrolesadd();">
+                                    <center>Add Role</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iammgmtrolesrevert" class="button" style="left:50px;" onclick="reloadiammgmtroles();">
+                                    <center>Reload Roles</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="hidden" id="rolepermissions" ListRoles="0" DeleteRoles="0">
+                </div>
+            </div>
+        </div>
+
+        <div id="iscsidiv" class="paneldiv">
+            <div class="topmenutab">
+                <button name="itargets" class="topmenutablinks active" onclick="changetopmenuselected(event, 'iscsidiv')">Targets</button>
+                <button name="iaccounts" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Accounts</button>
+                <button name="iinterfaces" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Interfaces</button>
+            </div>
+            <div id="itargetsconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
+                &nbsp;<br><br>
+                <div class="paneltitle">iSCSI Target Configuration</div>
+
+                <div class="iscsitargetsdiv" id="iscsitargetsdiv" iscsitargetcount="0" updating="all" updatingid="0" updatenext="0">
+                </div>
+                <div style="line-height: 1.5;">
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="iscsitargetsave" class="buttondisabled" style="left:50px;" onclick="saveiscsitargets();">
+                                    <center>Save</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iscsitargetadd" class="button" style="left:50px;" onclick="iscsitargetadd(null);">
+                                    <center>Add Target</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iscsitargetrevert" class="button" style="left:50px;" onclick="reloadiscsitargets();">
+                                    <center>Reload</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div><br>
+            </div>
+
+            <div id="iaccountsconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                &nbsp;<br><br>
+                <div class="paneltitle">iSCSI Accounts Configuration</div>
+
+                <div class="iscsiaccountsdiv" id="iscsiaccountsdiv" iscsiaccountcount="0">
+
+                </div>
+                <div style="line-height: 1.5;">
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="iscsiaccountadd" class="button" style="left:50px;" onclick="iscsiaccountadd();">
+                                    <center>Add</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iscsiaccountsave" class="buttondisabled" style="left:50px;" onclick="saveiscsiaccounts();">
+                                    <center>Save</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iscsiaccountrevert" class="buttondisabled" style="left:50px;" onclick="reloadiscsiaccounts();">
+                                    <center>Reload</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+            </div>
+            <div id="iinterfacesconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                &nbsp;<br><br>
+                <div class="paneltitle">iSCSI Interfaces Configuration</div>
+
+                <div class="iscsiinterfacesdiv" id="iscsiinterfacesdiv" iscsiinterfacecount="0">
+
+                </div>
+                <div style="line-height: 1.5;">
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="iscsiinterfaceadd" class="button" style="left:50px;" onclick="iscsiinterfaceadd( 'defaults');">
+                                    <center>Add</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iscsiinterfacesave" class="buttondisabled" style="left:50px;" onclick="saveiscsiinterfaces();">
+                                    <center>Save</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iscsiinterfacerevert" class="buttondisabled" style="left:50px;" onclick="reloadiscsiinterfaces();">
+                                    <center>Reload</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+
+                <br>
+            </div>
+        </div>
+
+        <div id="licensediv" class="paneldiv">
+            <div class="paneltitle">Nexfs License Details</div>
+            <div id="licenseinfo" class="licenseinfo" style="left:50px; top: 70px">
+                <table>
+                    <tr>
+                        <td>Version:</td>
+                        <td id="licenseversion">-</td>
+                    </tr>
+                    <tr>
+                        <td>ID:</td>
+                        <td id="licenseid">-</td>
+                    </tr>
+                    <tr>
+                        <td>Expiry:</td>
+                        <td id="licenseexpiry">-</td>
+                    </tr>
+                    <tr>
+                        <td>Type:</td>
+                        <td id="licensetype">-</td>
+                    </tr>
+                    <tr>
+                        <td>Capacity:</td>
+                        <td id="licensecapacity">-</td>
+                    </tr>
+                    <tr>
+                        <td>Tier2:</td>
+                        <td id="licensetier2">-</td>
+                    </tr>
+                    <tr>
+                        <td>Smart Tier:</td>
+                        <td id="licensesmarttier">-</td>
+                    </tr>
+                    <tr>
+                        <td>Smart Protect:</td>
+                        <td id="licensesmartprotect">-</td>
+                    </tr>
+                    <tr>
+                        <td>Smart Protect Open Files:</td>
+                        <td id="licensesmartprotectopenfiles">-</td>
+                    </tr>
+                    <tr>
+                        <td>Smart Tier Open Files:</td>
+                        <td id="licensesmarttieropenfiles">-</td>
+                    </tr>
+                    <tr>
+                        <td>Tier3 Compression:</td>
+                        <td id="licensetier3compression">-</td>
+                    </tr>
+                    <tr>
+                        <td>Tier3 Encryption:</td>
+                        <td id="licensetier3encryption">-</td>
+                    </tr>
+                    <tr>
+                        <td style="line-height:10px;" colspan=2>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="licenserefresh" class="button" style="left:50px;" onclick="getlicensedetails(this)">
+                                <center>Refresh</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="licensereplace" class="hidden" style="left:50px;" onclick="showupdatelicensediv()">
+                                <center>Replace</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="updatelicensediv" class="hidden">
+            <div id="updatelicensediv" class="updatelicensediv">
+                <div class="paneltitle">Update License Key</div>
+                <div id="licenseinfo" class="licenseinfo" style="left:50px; top: 70px">
+                    <table>
+                        <tr>
+                            <td>Live License Key:</td>
+                            <td id="currentlicensekey"></td>
+                        </tr>
+                        <tr>
+                            <td>New License Key:</td>
+                            <td><input type="text" size="50px" id="newlicensekey"></td>
+                        </tr>
+                        <tr>
+                            <td style="line-height:10px;" colspan=2>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div id="cancellicenseupdate" class="button" style="left:50px;" onclick="getElementById( 'updatelicensediv').className='hidden'">
+                                    <center>Cancel</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="dolicenseupdate" class="button" style="left:50px;" onclick="uploadlicensekey(this)">
+                                    <center>Upload</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="systemstatusdiv" class="paneldiv">
+            <div id="statusnexfsrefresh" class="button" style="left:900px; top: 10px" onclick="getsystemstatus(this)">
+                <center>Refresh</center>
+            </div>
+            <div class="paneltitle">Nexfs System Status</div>
+            <div id="statusnexfs" class="nexfsstatusitem nexfsstatusok" style="left: 20px; top: 70px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Nexfs Server:</td>
+                            <td id="statusnexfsservertext">OK</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statusstructurereplication" class="nexfsstatusitem nexfsstatusdisabled" style="left: 350px; top: 70px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Structure Data Replication:</td>
+                            <td id="statusstructurereplicationtext">Disabled</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier1structture" class="nexfsstatusitem nexfsstatusdisabled" style="left: 20px; top: 100px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-1 Structure:</td>
+                            <td id="statustier1structuretext">Disabled</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier2structture" class="nexfsstatusitem nexfsstatusdisabled" style="left: 350px; top: 100px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-2 Structure:</td>
+                            <td id="statustier2structuretext">Disabled</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier1data" class="nexfsstatusitem nexfsstatusdisabled" style="left: 20px; top: 130px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-1 Data:</td>
+                            <td id="statustier1datatext">Disabled</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier2data" class="nexfsstatusitem nexfsstatusdisabled" style="left: 350px; top: 130px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-2 Data:</td>
+                            <td id="statustier2datatext">Disabled</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier1datathreshold" class="nexfsstatusitem nexfsstatusdisabled" style="left: 20px; top: 160px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-1 Data Threshold:</td>
+                            <td id="statustier1datathresholdtext">N/A</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier2datathreshold" class="nexfsstatusitem nexfsstatusdisabled" style="left: 350px; top: 160px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-2 Data Threshold:</td>
+                            <td id="statustier2datathresholdtext">N/A</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statustier3" class="nexfsstatusitem nexfsstatusdisabled" style="left: 20px; top: 190px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Tier-3 Status:</td>
+                            <td id="statustier3text">N/A</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statusiscsi" class="nexfsstatusitem nexfsstatusdisabled" style="left: 20px; top: 220px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>iSCSI Status:</td>
+                            <td id="statusiscsitext">N/A</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statusnfs" class="nexfsstatusitem nexfsstatusdisabled" style="left: 350px; top: 220px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>NFS Start/Stop:</td>
+                            <td id="statusnfstext">N/A</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statusinfo" class="statusinfo" style="left:700px; top: 70px">
+                <table>
+                    <tr>
+                        <td>Hostname:</td>
+                        <td id="statushostname">-</td>
+                    </tr>
+                    <tr>
+                        <td>Nexfs Release:</td>
+                        <td id="statussoftwarerelease">-</td>
+                    </tr>
+                    <tr>
+                        <td>Software Expires:</td>
+                        <td id="statussoftwareexpires">-</td>
+                    </tr>
+                    <tr>
+                        <td>License:</td>
+                        <td id="statuslicense">-</td>
+                    </tr>
+                    <tr>
+                        <td>Uptime:</td>
+                        <td id="statusuptime">-</td>
+                    </tr>
+                    <tr>
+                        <td>Mountpoint:</td>
+                        <td id="statusmountpoint">-</td>
+                    </tr>
+                    <tr>
+                        <td>Job Scheduler:</td>
+                        <td id="statusjobscheduler">-</td>
+                    </tr>
+                    <tr>
+                        <td>BG Migrations:</td>
+                        <td id="statusbgmigrations">-</td>
+                    </tr>
+                    <tr>
+                        <td>Deletion Scheduler:</td>
+                        <td id="statusdeletionscheduler">-</td>
+                    </tr>
+                </table>
+            </div>
+            <div id="statuscircles">
+                <div id="statuscirclemanagedcapacity" class="statuscircle statuscircleok" style="left: 50px; top: 320px">-TB
+                </div>
+                <div class="statuscirclelabel" style="left: 110px; top: 535px">Managed Capacity</div>
+                <div id="statuscircletier1datastorage" class="statuscircle statuscircledisabled" style="left: 280px; top: 320px">N/A</div>
+                <div class="statuscirclelabel" style="left: 350px; top: 535px">Tier-1 Data Storage</div>
+                <div id="statuscircletier2datastorage" class="statuscircle statuscircledisabled" style="left: 510px; top: 320px">N/A</div>
+                <div class="statuscirclelabel" style="left: 580px; top: 535px">Tier-2 Data Storage</div>
+                <div id="statuscircletier3datastorage" class="statuscircle statuscircledisabled" style="left: 740px; top: 320px">N/A</div>
+                <div class="statuscirclelabel" style="left: 810px; top: 535px">Tier-3 Data Storage</div>
+            </div>
+            <div class="paneltitle statuslogerrorlabel">Error Log</div>
+            <div id="systemstatuslogerror" class="statuslogerrors">
+                <div id="systemststauslogerrors"></div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
