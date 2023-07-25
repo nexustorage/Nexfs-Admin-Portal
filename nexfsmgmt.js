@@ -1,8 +1,8 @@
 /*
-nexfsmgmt.js v0.9.0  www.nexustorage.com
+nexfsmgmt.js v1.01(23)  www.nexustorage.com
 
-(c) 2022 by Nexustorage Limited. All rights reserved.
-(c) 2022 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
+(c) 2022 2023 by Nexustorage Limited. All rights reserved.
+(c) 2022 2023 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
 // This file is part of Nexustorage Nexfs Storage stack
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,9 @@ nexfsmgmt.js v0.9.0  www.nexustorage.com
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+var LastHttpRequest = {};
+LastHttpRequest.active = 0;
 
 function hidediv(thediv) {
     document.getElementById(thediv).classList.remove("visible");
@@ -135,7 +138,7 @@ function validatechangesecretkey() {
 
 function completecreatefile() {
     var newfile = document.getElementById('editfilename').value;
-    var fileselectcurrentfolder = document.getElementById('fileselectcurrentfolder').value;
+    /* var fileselectcurrentfolder = document.getElementById('fileselectcurrentfolder').value; */
     var insertpos = 0;
 
     const filentries = document.getElementsByName("fileentry");
@@ -340,7 +343,7 @@ function savefolder() {
 
 function enableiscsibuttons(section) {
     var iscsitovalidate = document.getElementById(section + 'sdiv').getElementsByClassName("iscsivalidate");
-    for (i = 0; i < iscsitovalidate.length; i++) {
+    for (let i = 0; i < iscsitovalidate.length; i++) {
         if (iscsitovalidate[i].checkValidity() == false) {
             document.getElementById(section + 'save').className = 'buttondisabled';
 
@@ -426,11 +429,12 @@ function iscsitargetadd(targetid) {
     const targethtml = rawhtml.replace(/@/g, "'");
 
     let iscsitargetcount = parseInt(document.getElementById('iscsitargetsdiv').getAttribute('iscsitargetcount'));
+    let nexttargetid;
 
     if (targetid == null) {
-        var nexttargetid = iscsitargetcount + 1;
+        nexttargetid = iscsitargetcount + 1;
     } else {
-        var nexttargetid = targetid;
+        nexttargetid = targetid;
     }
     const targethtmlwithonchange = targethtml.replace(/ONCHANGE/g, onchange);
     const targetwithondelete = targethtmlwithonchange.replace(/ONDELETE/g, ondelete);
@@ -476,7 +480,7 @@ function iscsitargetlunadd(targetid, lunid) {
 
     const lunhtml = rawhtml.replace(/@/g, "'");
 
-    maxlunid = parseInt(document.getElementById('iscsitarget' + targetid + 'lunsdiv').getAttribute('iscsiluncount'));
+    let maxlunid = parseInt(document.getElementById('iscsitarget' + targetid + 'lunsdiv').getAttribute('iscsiluncount'));
 
     if (maxlunid < parseInt(lunid)) {
         maxlunid = parseInt(lunid);
@@ -567,7 +571,7 @@ function iscsiinterfaceadd() {
 function enablenfsexportbuttons() {
 
     var nfsexportfolders = document.getElementsByClassName("nfsexportedfolder");
-    for (i = 0; i < nfsexportfolders.length; i++) {
+    for (let i = 0; i < nfsexportfolders.length; i++) {
         if (nfsexportfolders[i].checkValidity() == false) {
             document.getElementById('nfsexportsave').className = 'buttondisabled';
             document.getElementById('nfsexportrevert').className = 'buttondisabled';
@@ -593,17 +597,18 @@ function toggleiamrole(roleentry) {
     }
 }
 
-function enableiammgmtrolebuttons(roleid) {
 
-    if (document.getElementById('iammgmtrolename' + roleid).checkValidity() == false || document.getElementById("rolepermissions").getAttribute('UpdateRoles') == '0') {
-        document.getElementById('iammgmtrolesave' + roleid).className = 'buttondisabled';
+function enablerolebuttons(roletype,roleid) {
+
+    if (document.getElementById(roletype + 'rolename' + roleid).checkValidity() == false || document.getElementById(roletype + "rolepermissions").getAttribute('UpdateRoles') == '0') {
+        document.getElementById(roletype + 'rolesave' + roleid).className = 'buttondisabled';
         return;
     }
 
-    document.getElementById('iammgmtrolesave' + roleid).className = 'button';
+    document.getElementById(roletype + 'rolesave' + roleid).className = 'button';
 
-    if (document.getElementById('iammgmtrole' + roleid).getAttribute('newrole') == 0) {
-        let roleversion = document.getElementById('iammgmtroleversion' + roleid).value;
+    if (document.getElementById(roletype + 'role' + roleid).getAttribute('newrole') == 0) {
+        let roleversion = document.getElementById(roletype + 'roleversion' + roleid).value;
         if (roleversion.charAt(2) == '/' && roleversion.charAt(5) == '/' && roleversion.charAt(10) == '.') {
             const date = new Date();
             const VERSIONDATE = date.toLocaleDateString("en-US", {
@@ -622,13 +627,13 @@ function enableiammgmtrolebuttons(roleid) {
                     versionincrement = versionint + 1;
                 }
                 let NEWVERSION = VERSIONDATE + versionincrement;
-                document.getElementById('iammgmtroleversion' + roleid).value = NEWVERSION;
+                document.getElementById(roletype + 'roleversion' + roleid).value = NEWVERSION;
             } else {
                 let NEWVERSION = VERSIONDATE + '0';
-                document.getElementById('iammgmtroleversion' + roleid).value = NEWVERSION;
+                document.getElementById(roletype + 'roleversion' + roleid).value = NEWVERSION;
             }
         }
-        document.getElementById('iammgmtrole' + roleid).setAttribute('newrole', 2);
+        document.getElementById(roletype+ 'role' + roleid).setAttribute('newrole', 2);
     }
 }
 
@@ -646,10 +651,13 @@ function createsaveiamuserrequest() {
     let UserName = null;
     let UserRawSecret = null;
     let UserSecretHash = null;
+    let UserContentSecret = null;
     let UserEmail = null;
     let UserDescription1 = null;
     let UserDescription2 = null;
     let UserAuthMethod = null;
+    let UID = null;
+    let GID = null;
 
     if (document.getElementById('iamedituserid').getAttribute('updated') == '1') {
         UserId = document.getElementById('iamedituserid').value;
@@ -661,6 +669,10 @@ function createsaveiamuserrequest() {
 
     if (document.getElementById('iameditusersecret').getAttribute('updated') == '1') {
         UserRawSecret = document.getElementById('iameditusersecret').value;
+    }
+
+    if (document.getElementById('iameditusercontentsecret').getAttribute('updated') == '1') {
+        UserContentSecret = document.getElementById('iameditusercontentsecret').value;
     }
 
     if (document.getElementById('iamedituseremail').getAttribute('updated') == '1') {
@@ -679,11 +691,27 @@ function createsaveiamuserrequest() {
         UserAuthMethod = document.getElementById('iamedituserauthmethod').value;
     }
 
+    if (document.getElementById('iamedituserposixuid').getAttribute('updated') == '1') {
+        UID = document.getElementById('iamedituserposixuid').value;
+        if ( UID == '' )
+        {
+          UID='default';
+        }
+    }
+
+    if (document.getElementById('iamedituserposixgid').getAttribute('updated') == '1') {
+        GID = document.getElementById('iamedituserposixgid').value;
+        if ( GID == '' )
+        {
+          GID='default';
+        }
+    }
+
     if (UserRawSecret != null) {
         UserSecretHash = new CryptoMD5.MD5(UserRawSecret).toString(CryptoMD5.enc.Hex);
     }
 
-    sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserEmail, UserDescription1, UserDescription2, UserAuthMethod);
+    sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserContentSecret, UserEmail, UserDescription1, UserDescription2, UserAuthMethod, UID, GID);
 }
 
 function createaddiamuserrequest() {
@@ -691,11 +719,21 @@ function createaddiamuserrequest() {
 
     let UserName = document.getElementById('iameditusername').value;
     let UserRawSecret = document.getElementById('iameditusersecret').value;
+    let UserContentSecret = document.getElementById('iameditusercontentsecret').value;
     let UserEmail = document.getElementById('iamedituseremail').value;
     let UserDescription1 = document.getElementById('iamedituserdescription1').value;
     let UserDescription2 = document.getElementById('iamedituserdescription2').value;
     let UserAuthMethod = document.getElementById('iamedituserauthmethod').value;
-
+    let UID='default';
+    if ( document.getElementById('iamedituserposixuid').value != '' )
+    {
+        UID=document.getElementById('iamedituserposixuid').value;
+    }
+    let GID='default';
+    if ( document.getElementById('iamedituserposixgid').value != '' )
+    {
+        GID=document.getElementById('iamedituserposixgid').value;
+    }
     var UserSecretHash = new CryptoMD5.MD5(UserRawSecret).toString(CryptoMD5.enc.Hex);
 
     const roleallowed = document.getElementById('iameditusermgmtroleselect');
@@ -717,40 +755,40 @@ function createaddiamuserrequest() {
         rolesjson = null;
     }
 
-    sendcreateuserrequest(UserId, UserName, UserSecretHash, UserEmail, UserDescription1, UserDescription2, UserAuthMethod, rolesjson);
+    sendcreateuserrequest(UserId, UserName, UserSecretHash, UserContentSecret, UserEmail, UserDescription1, UserDescription2, UserAuthMethod, rolesjson, UID, GID);
 }
 
-function iammgmtrolessave(roleid) {
+function iamrolessave(roleid, roletype) {
     let Enabled = 0;
     let addpolicy = 0;
     let policy = '';
     let addcomma = '';
 
-    if (document.getElementById('iammgmtrolename' + roleid).checkValidity == false) {
+    if (document.getElementById(roletype+'rolename' + roleid).checkValidity == false) {
         return;
     }
 
-    let RoleName = document.getElementById('iammgmtrolename' + roleid).value;
-    let Version = document.getElementById('iammgmtroleversion' + roleid).value;
-    if (document.getElementById('iammgmtroleenabled' + roleid).checked) {
+    let RoleName = document.getElementById(roletype+'rolename' + roleid).value;
+    let Version = document.getElementById(roletype+'roleversion' + roleid).value;
+    if (document.getElementById(roletype+'roleenabled' + roleid).checked) {
         Enabled = 1;
     }
 
     let Statement = '{"Version":"' + Version + '","Statement":[';
 
     policy = '{';
-    if (document.getElementById('iammgmtroleallowedsid' + roleid).value != null) {
-        policy += '"Sid": "' + document.getElementById('iammgmtroleallowedsid' + roleid).value + '"';
+    if (document.getElementById(roletype+'roleallowedsid' + roleid).value != null) {
+        policy += '"Sid": "' + document.getElementById(roletype+'roleallowedsid' + roleid).value + '"';
         addcomma = ',';
         addpolicy = 1;
     }
 
     policy += addcomma + '"Effect": "Allow"';
 
-    if (document.getElementById('iammgmtrolesallowed' + roleid).value != null) {
+    if (document.getElementById(roletype+'rolesallowed' + roleid).value != null) {
         policy += addcomma + '"Action": [';
         addcomma = '';
-        const roleallowed = document.getElementById('iammgmtrolesallowed' + roleid);
+        const roleallowed = document.getElementById(roletype+'rolesallowed' + roleid);
 
         for (let role = 0; role < roleallowed.options.length; role++) {
             if (roleallowed.options[role].selected) {
@@ -768,18 +806,18 @@ function iammgmtrolessave(roleid) {
     }
 
     policy = addcomma + '{';
-    if (document.getElementById('iammgmtroledeniedsid' + roleid).value != null) {
-        policy += '"Sid": "' + document.getElementById('iammgmtroledeniedsid' + roleid).value + '"';
+    if (document.getElementById(roletype+'roledeniedsid' + roleid).value != null) {
+        policy += '"Sid": "' + document.getElementById(roletype+'roledeniedsid' + roleid).value + '"';
         addcomma = ',';
         addpolicy = 1;
     }
 
     policy += addcomma + '"Effect": "Deny"';
 
-    if (document.getElementById('iammgmtrolesdenied' + roleid).value != null) {
+    if (document.getElementById(roletype+'rolesdenied' + roleid).value != null) {
         policy += addcomma + '"Action": [';
         addcomma = '';
-        const roleallowed = document.getElementById('iammgmtrolesdenied' + roleid);
+        const roleallowed = document.getElementById(roletype+'rolesdenied' + roleid);
 
         for (let role = 0; role < roleallowed.options.length; role++) {
             if (roleallowed.options[role].selected) {
@@ -799,34 +837,33 @@ function iammgmtrolessave(roleid) {
 
     let CreateRole = false;
 
-    if (document.getElementById('iammgmtrolesave' + roleid).innerHTML.includes('Create')) {
+    if (document.getElementById(roletype+'rolesave' + roleid).innerHTML.includes('Create')) {
         CreateRole = true;
     }
 
-    sendsaverolerequest(RoleName, Statement, Version, CreateRole, roleid, Enabled);
+    sendsaverolerequest(RoleName, Statement, Version, CreateRole, roleid, Enabled, roletype);
 }
 
+function iamrolesadd(roletype,setroleid) {
 
-function iammgmtrolesadd(setroleid) {
-
-    const rawrolehtml = '<div class="iammgmtrolecontent" id="iammgmtroleX" iammgmtrole="X" newrole="1">' +
-        '    <div class="iammgmtroleheader">' +
-        '        <div class="iammgmtrolename">' +
-        '             <input name="iammgmtroleX" id="iammgmtrolenameX" class="iammgmtrolename" onchange="enableiammgmtrolebuttons(@X@)"' +
-        '                placeholder="Management Role Name"  required></div>' +
-        '        <div class="iammgmtrolecollapsiblebutton" onclick="toggleiamrole(@iammgmtrolebodyX@)"><img' +
-        '                name="iammgmtrolecollapsiblebuttonicon" id="iammgmtrolecollapsiblebuttonX" src="MinusIcon.png"></div>' +
+    const rawrolehtml = '<div class="ROLETYPErolecontent" id="ROLETYPEroleX" ROLETYPErole="X" newrole="1">' +
+        '    <div class="iamroleheader">' +
+        '        <div class="iamrolename">' +
+        '             <input name="ROLETYPEroleX" id="ROLETYPErolenameX" class="iamrolename" onchange="enablerolebuttons(@ROLETYPE@,@X@)"' +
+        '                placeholder="Role Name"  required></div>' +
+        '        <div class="iamrolecollapsiblebutton" onclick="toggleiamrole(@ROLETYPErolebodyX@)"><img' +
+        '                name="ROLETYPErolecollapsiblebuttonicon" id="ROLETYPErolecollapsiblebuttonX" src="MinusIcon.png"></div>' +
         '    </div>' +
-        '    <div class="iammgmtrolebody" id="iammgmtrolebodyX" style="max-height: 0px;">' +
-        '        <div class="iammgmtroletable">' +
+        '    <div class="iamrolebody" id="ROLETYPErolebodyX" style="max-height: 0px;">' +
+        '        <div class="iamcontentroletable">' +
         '          <table>' +
         '            <tr>' +
         '              <td onclick="openshowhelp(@IamRoleID@)" class="iamrolelabel iamroleid">Role ID</td>' +
-        '              <td class="iamroleidinput"><input type="number" name="iammgmtroleX" id="iammgmtroleidX" placeholder="auto" value="X" disabled></td>' +
+        '              <td class="iamroleidinput"><input type="number" name="ROLETYPEroleX" id="ROLETYPEroleidX" placeholder="auto" value="X" disabled></td>' +
         '              <td onclick="openshowhelp(@IamRoleEnabled@)" class="iamrolelabel iamroleenabled">Role Enabled</td>' +
-        '              <td class="iamroleenabledcheckbox"><input type="checkbox" id="iammgmtroleenabledX" name="iammgmtroleX" checked onchange="enableiammgmtrolebuttons(@X@)"></td>' +
+        '              <td class="iamroleenabledcheckbox"><input type="checkbox" id="ROLETYPEroleenabledX" name="ROLETYPEroleX" checked onchange="enablerolebuttons(@ROLETYPE@,@X@)"></td>' +
         '              <td onclick="openshowhelp(@IamRoleVersion@)" class="iamrolelabel iamroleversion">Role Version</td>' +
-        '              <td class="iamroleversioninput"><input type="text" name="iammgmtroleX" id="iammgmtroleversionX" size="35" value="VERSION" disabled></td>' +
+        '              <td class="iamroleversioninput"><input type="text" name="ROLETYPEroleX" id="ROLETYPEroleversionX" size="35" value="VERSION" onchange="enablerolebuttons(@ROLETYPE@,@X@)"></td>' +
         '            </tr>' +
         '          </table>' +
         '        </div>' +
@@ -835,15 +872,15 @@ function iammgmtrolesadd(setroleid) {
         '        <table>' +
         '        <tr>' +
         '          <td onclick="openshowhelp(@IamRoleAllowed@)" class="iamrolelabel">Allowed Actions</td>' +
-        '          <td "openshowhelp(@IamRoleDenied@)" class="iamrolelabel">Explicitly Denied Actions</td>' +
+        '          <td onclick="openshowhelp(@IamRoleDenied@)" class="iamrolelabel">Explicitly Denied Actions</td>' +
         '        </tr>' +
         '        <tr>' +
-        '          <td><input type="text" name="iammgmtroleX" id="iammgmtroleallowedsidX" placeholder="Optional Policy Identifier" size="47" onchange="enableiammgmtrolebuttons(@X@)"></td>' +
-        '          <td><input type="text" name="iammgmtroleX" id="iammgmtroledeniedsidX" placeholder="Optional Policy Identifier" size="47" onchange="enableiammgmtrolebuttons(@X@)"></td>' +
+        '          <td><input type="text" name="ROLETYPEroleX" id="ROLETYPEroleallowedsidX" placeholder="Optional Policy Identifier" size="47" onchange="enablerolebuttons(@ROLETYPE@,@X@)"></td>' +
+        '          <td><input type="text" name="ROLETYPEroleX" id="ROLETYPEroledeniedsidX" placeholder="Optional Policy Identifier" size="47" onchange="enablerolebuttons(@ROLETYPE@,@X@)"></td>' +
         '        </tr>' +
         '        <tr>' +
-        '          <td class="iamroleactionselect"><select id="iammgmtrolesallowedX" multiple ONCHANGE></select></td>' +
-        '          <td class="iamroleactionselect"><select id="iammgmtrolesdeniedX" multiple ONCHANGE></select></td>' +
+        '          <td class="iamroleactionselect"><select id="ROLETYPErolesallowedX" multiple ONCHANGE></select></td>' +
+        '          <td class="iamroleactionselect"><select id="ROLETYPErolesdeniedX" multiple ONCHANGE></select></td>' +
         '        </tr>' +
         '        </table>' +
         '        </div>' +
@@ -851,12 +888,12 @@ function iammgmtrolesadd(setroleid) {
         '        <div class="iamrolebuttons"><table>' +
         '          <tr>' +
         '            <td>' +
-        '              <div id="iammgmtrolesaveX" class="buttondisabled" style="left:50px;" onclick="iammgmtrolessave(@X@);"> ' +
+        '              <div id="ROLETYPErolesaveX" class="buttondisabled" style="left:50px;" onclick="iamrolessave(@X@,@ROLETYPE@);"> ' +
         '                <center>Create Role</center> ' +
         '              </div> ' +
         '            </td> ' +
         '            <td> ' +
-        '              <div id="iammgmtroledeleteX" class="button" style="left:500px; " onclick="deleteiammgmtrole(@X@);"> ' +
+        '              <div id="ROLETYPEroledeleteX" class="button" style="left:500px; " onclick="deleterole(@ROLETYPE@,@X@);"> ' +
         '                <center>Delete Role</center> ' +
         '              </div> ' +
         '            </td> ' +
@@ -874,47 +911,51 @@ function iammgmtrolesadd(setroleid) {
     }) + '.0';
 
     const rolehtml = rawrolehtml.replace(/@/g, "'");
-    var rolecount = parseInt(document.getElementById('iammgmtrolesdiv').getAttribute('iammgmtrolecount'));
+    let rolecount = parseInt(document.getElementById(roletype+'rolesdiv').getAttribute(roletype+'rolecount'));
+    let roleid;
 
     if (setroleid == null) {
-        var roleid = rolecount + 1;
-        document.getElementById('iammgmtrolesdiv').setAttribute('iammgmtrolecount', roleid);
+        roleid = rolecount + 1;
+        document.getElementById(roletype+'rolesdiv').setAttribute(roletype+'rolecount', roleid);
     } else {
-        var roleid = setroleid;
+        roleid = setroleid;
         if (roleid > rolecount) {
-            document.getElementById('iammgmtrolesdiv').setAttribute('iammgmtrolecount', roleid);
+            document.getElementById(roletype+'rolesdiv').setAttribute(roletype+'rolecount', roleid);
         }
     }
 
-    var onchange = 'onchange="';
-    onchange += "enableiamtrolessavebutton('+roleid+')";
+    let onchange = 'onchange="';
+    onchange += "enablerolessavebutton(ROLETYPE+','+roleid+')";
     onchange += '" ';
 
-    const rolehtmlwithonchange = rolehtml.replace(/ONCHANGE/, VERSION);
+    const rolehtmlwithtype = rolehtml.replace(/ROLETYPE/g, roletype);
+    const rolehtmlwithonchange = rolehtmlwithtype.replace(/ONCHANGE/, onchange);
     const rolehtmlwithversion = rolehtmlwithonchange.replace(/VERSION/, VERSION);
     const rolehtmlwithid = rolehtmlwithversion.replace(/X/g, roleid);
-    document.getElementById('iammgmtrolesdiv').insertAdjacentHTML('beforeend', rolehtmlwithid);
+    document.getElementById(roletype+'rolesdiv').insertAdjacentHTML('beforeend', rolehtmlwithid);
 
-    toggleiamrole("iammgmtrolebody" + roleid);
+    toggleiamrole(roletype+"rolebody" + roleid);
 
     if (setroleid == null) {
-        updatemgmtroleactionselects(roleid);
+        updateroleactionselects(roletype,roleid);
     }
 
-    if (document.getElementById("rolepermissions").getAttribute('UpdateRoles') == '0') {
-        document.getElementById("iammgmtroledelete" + roleid).disabled = true;
-        document.getElementById("iammgmtrole" + roleid).disabled = true;
-        document.getElementById("iammgmtroleenabled" + roleid).disabled = true;
-        document.getElementById("iammgmtroleallowedsid" + roleid).disabled = true;
-        document.getElementById("iammgmtroledeniedsid" + roleid).disabled = true;
+    if (document.getElementById(roletype+"rolepermissions").getAttribute('UpdateRoles') == '0') {
+        document.getElementById(roletype+"roledelete" + roleid).disabled = true;
+        document.getElementById(roletype+"role" + roleid).disabled = true;
+        document.getElementById(roletype+"roleenabled" + roleid).disabled = true;
+        document.getElementById(roletype+"roleallowedsid" + roleid).disabled = true;
+        document.getElementById(roletype+"roledeniedsid" + roleid).disabled = true;
     }
 
-    if (document.getElementById("rolepermissions").getAttribute('DeleteRoles') == '0') {
-        document.getElementById("iammgmtroledelete" + roleid).disabled = true;
+    if (document.getElementById(roletype+"rolepermissions").getAttribute('DeleteRoles') == '0') {
+        document.getElementById(roletype+"roledelete" + roleid).disabled = true;
     }
 
     return roleid;
 }
+
+
 
 function closeiamuser() {
 
@@ -924,19 +965,39 @@ function closeiamuser() {
         }
     }
 
-    var nfsexport = document.getElementById('iamedituserdiv').classList.add('hidden');
+    document.getElementById('iamedituserdiv').classList.add('hidden');
+    document.getElementById('iameditusersecret').value = '';
+    document.getElementById('iameditusercontentsecret').value = '';
 }
 
 function iameditvalidate(changed) {
-    let formvalid = 1;
 
     if (changed != null) {
         document.getElementById(changed).setAttribute('updated', '1');
     }
 
+    if ( document.getElementById('iameditusersecret').value.length > 0 )
+    {
+        document.getElementById('iameditusersecret').required = true; 
+    }
+    else
+    {
+        document.getElementById('iameditusersecret').required = false; 
+    }
+
+    if ( document.getElementById('iameditusercontentsecret').value.length > 0 )
+    {
+        document.getElementById('iameditusercontentsecret').required = true; 
+    }
+    else
+    {
+        document.getElementById('iameditusercontentsecret').required = false; 
+    }
+
     if (document.getElementById('iamedituserid').checkValidity() == false ||
         document.getElementById('iameditusername').checkValidity() == false ||
-        document.getElementById('iameditusersecret').checkValidity() == false) {
+        document.getElementById('iameditusersecret').checkValidity() == false ||
+        document.getElementById('iameditusercontentsecret').checkValidity() == false) {
         document.getElementById('iamsaveuserbutton').className = 'buttondisabled';
     } else {
         document.getElementById('iamsaveuserbutton').className = 'button';
@@ -961,22 +1022,30 @@ function resetiameditfieldstatus() {
     document.getElementById('iamedituserenabled').setAttribute('updated', '0');
     document.getElementById('iameditusername').setAttribute('updated', '0');
     document.getElementById('iameditusersecret').setAttribute('updated', '0');
+    document.getElementById('iameditusercontentsecret').setAttribute('updated', '0');
     document.getElementById('iamedituseremail').setAttribute('updated', '0');
+    document.getElementById('iamedituserposixuid').setAttribute('updated', '0');
+    document.getElementById('iamedituserposixgid').setAttribute('updated', '0');
     document.getElementById('iamedituserdescription1').setAttribute('updated', '0');
     document.getElementById('iamedituserdescription2').setAttribute('updated', '0');
     document.getElementById('iamedituserauthmethod').setAttribute('updated', '0');
     document.getElementById('iameditusermgmtroleselect').setAttribute('updated', '0');
+    document.getElementById('iamedituserroleselect').setAttribute('updated', '0');
 }
 
-function iamedituser(userid, rowindex) {
+function iamedituser(userid) {
     document.getElementById('iamedituserid').value = '';
     document.getElementById('iamedituserenabled').checked = true;
     document.getElementById('iameditusername').value = '';
     document.getElementById('iameditusersecret').value = '';
+    document.getElementById('iameditusercontentsecret').value = '';
     document.getElementById('iamedituseremail').value = '';
+    document.getElementById('iamedituserposixuid').value = '';
+    document.getElementById('iamedituserposixgid').value = '';
     document.getElementById('iamedituserdescription1').value = '';
     document.getElementById('iamedituserdescription2').value = '';
     document.getElementById('iameditusersecret').required = false;
+    document.getElementById('iameditusercontentsecret').required = false;
     document.getElementById('iamedituserauthmethod').value = '0';
     document.getElementById('iamdeleteuserbutton').className = 'button';
     document.getElementById('iamsaveuserbutton').className = 'buttondisabled';
@@ -984,6 +1053,7 @@ function iamedituser(userid, rowindex) {
     document.getElementById('iamedituserenabled').disabled = false;
     document.getElementById('iamedituserdiv').classList.remove('hidden');
     document.getElementById('iameditusermgmtroleselect').options.length = 0;
+    document.getElementById('iamedituserroleselect').options.length = 0;
     resetiameditfieldstatus();
     if (document.getElementById("useradminpermissions").getAttribute('UpdateUsers') == '1') {
         document.getElementById('iamdeleteuserbutton').className = 'button';
@@ -1002,7 +1072,10 @@ function setiameditfieldmode(modedisabled) {
     document.getElementById('iamedituserenabled').disabled = modedisabled;
     document.getElementById('iameditusername').disabled = modedisabled;
     document.getElementById('iameditusersecret').disabled = modedisabled;
+    document.getElementById('iameditusercontentsecret').disabled = modedisabled;
     document.getElementById('iamedituseremail').disabled = modedisabled;
+    document.getElementById('iamedituserposixuid').disabled = modedisabled;
+    document.getElementById('iamedituserposixgid').disabled = modedisabled;
     document.getElementById('iamedituserdescription1').disabled = modedisabled;
     document.getElementById('iamedituserdescription2').disabled = modedisabled;
     document.getElementById('iamedituserauthmethod').disabled = modedisabled;
@@ -1013,11 +1086,15 @@ function iamaccountadd() {
     document.getElementById('iamedituserenabled').checked = true;
     document.getElementById('iameditusername').value = '';
     document.getElementById('iameditusersecret').value = '';
+    document.getElementById('iameditusercontentsecret').value = '';
+    document.getElementById('iamedituserposixuid').value = '';
+    document.getElementById('iamedituserposixgid').value = '';
     document.getElementById('iamedituseremail').value = '';
     document.getElementById('iamedituserdescription1').value = '';
     document.getElementById('iamedituserdescription2').value = '';
     document.getElementById('iamedituserauthmethod').value = '0';
-    document.getElementById('iameditusersecret').required = true;
+    document.getElementById('iameditusersecret').required = false;
+    document.getElementById('iameditusercontentsecret').required = false;
     document.getElementById('iamdeleteuserbutton').className = 'buttondisabled';
     document.getElementById('iamsaveuserbutton').className = 'buttondisabled';
     document.getElementById('iamsaveuserbutton').innerHTML = '<center>Create</center>';
@@ -1026,7 +1103,7 @@ function iamaccountadd() {
     document.getElementById('iamedituserdiv').classList.remove('hidden');
     resetiameditfieldstatus();
     setiameditfieldmode(false);
-    if (document.getElementById("rolepermissions").getAttribute('ListRoles') == '1') {
+    if (document.getElementById("iammgmtrolepermissions").getAttribute('ListManagementRoles') == '1' || document.getElementById("iamcontentrolepermissions").getAttribute('ListContentRoles') == '1' ) {
         getconfig('ListRoles');
     }
 }
@@ -1061,8 +1138,8 @@ function iaminsertnewaccount(tablerow, userid, username, enabled) {
     }
 
     if (document.getElementById("useradminpermissions").getAttribute('GetUser') == '1') {
-        editiconcell.addEventListener("click", function() { iamedituser(userid, row.rowIndex); });
-        row.addEventListener("dblclick", function() { iamedituser(userid, row.rowIndex); });
+        editiconcell.addEventListener("click", function() { iamedituser(userid); });
+        row.addEventListener("dblclick", function() { iamedituser(userid); });
     }
 }
 
@@ -1163,6 +1240,11 @@ function reloadiammgmtroles() {
         getconfig('GetManagementRoles');
     }
 }
+function reloadiamcontentroles() {
+    if (confirm("Are you sure you want to reload all Content Roles from Nexfs?") == true) {
+        getconfig('GetContentRoles');
+    }
+}
 
 function reloadnfsexports() {
     if (confirm("Are you sure you want to reload the entire nfs export list from Nexfs?") == true) {
@@ -1218,7 +1300,7 @@ function populateiscsiaccountdiv(iscsijson) {
 
     const iscsiaccountist = iscsijson.accounts;
     const iscsiaccounts = Object.keys(iscsiaccountist);
-    iscsiaccounts.forEach((entry, index) => {
+    iscsiaccounts.forEach(function(entry) {
         let accountid = iscsiaccountadd();
         document.getElementById('iscsiaccountusername' + accountid).value = iscsiaccountist[entry].account.username;
         document.getElementById('iscsiaccountusername' + accountid).required = false;
@@ -1239,7 +1321,7 @@ function populateiscsiinterfacediv(iscsijson) {
 
     const iscsiinterfacelist = iscsijson.interfaces;
     const iscsiinterfaces = Object.keys(iscsiinterfacelist);
-    iscsiinterfaces.forEach((entry, index) => {
+    iscsiinterfaces.forEach(function(entry) {
         let interfaceid = iscsiinterfaceadd();
         let interfacedetails = iscsiinterfacelist[entry].interface.address.split(':');
         document.getElementById('iscsiinterfaceaddress' + interfaceid).value = interfacedetails[0];
@@ -1263,7 +1345,7 @@ function UpdateNFSExports(nfsexportjson) {
 
     const nfsexportlist = nfsexportjson.nfsexports;
     const nfsexports = Object.keys(nfsexportlist);
-    nfsexports.forEach((entry, index) => {
+    nfsexports.forEach(function (entry) {
         let newexportid = nfsexportadd();
         document.getElementById('nfsexportfolder' + newexportid).value = nfsexportlist[entry].exportdir;
         document.getElementById('nfsexportclients' + newexportid).value = nfsexportlist[entry].auth;
@@ -1320,8 +1402,10 @@ function togglenfsexports(exportrow) {
 }
 
 function showconfigurationhelp(e, helpsource, corsource) {
-    var ypos;
-    var helpvalues = document.getElementById(helpsource);
+    let helpvalues = document.getElementById(helpsource);
+    if ( ! helpvalues.hasAttribute('livevalue')) {
+        helpvalues = helpvalues.firstElementChild;
+    }   
 
     document.getElementById('configurationhelplabel').innerHTML = helpvalues.getAttribute('tag');
 
@@ -1366,13 +1450,13 @@ function getSignatureKey(key, dateStamp, regionName, serviceName) {
 
 function createconfvarsrequest(confdiv) {
 
-    var reqeustjson;
+    var requestjson;
     var configinputs = document.getElementById(confdiv).getElementsByClassName("configinput");
     var addcomma = 0;
 
 
     requestjson = '{ "Configs": [';
-    for (i = 0; i < configinputs.length; i++)
+    for (let i = 0; i < configinputs.length; i++)
         if ((configinputs[i].tagName == "INPUT") || (configinputs[i].tagName == "SELECT")) {
             if (addcomma == 0)
                 addcomma = 1;
@@ -1403,15 +1487,15 @@ function createconfvarsrequest(confdiv) {
 }
 
 function changetoplevel2menuselected(e) {
-    var tablinks, tabcontents;
+    let tablinks, tabcontent;
 
     tabcontent = document.getElementsByClassName("storageconfigurationtabdiv");
-    for (i = 0; i < tabcontent.length; i++) {
+    for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
 
     tablinks = document.getElementsByClassName("toplevel2menutablinks");
-    for (i = 0; i < tablinks.length; i++) {
+    for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
 
@@ -1427,15 +1511,15 @@ function changetoplevel2menuselected(e) {
 }
 
 function changetopmenuselected(e, section) {
-    var tablinks, tabcontents;
+    let tablinks; 
 
-    tabcontent = document.getElementById(section).getElementsByClassName("configurationtabdiv");
-    for (i = 0; i < tabcontent.length; i++) {
+    let tabcontent = document.getElementById(section).getElementsByClassName("configurationtabdiv");
+    for (let i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
     }
 
     tablinks = document.getElementById(section).getElementsByClassName("topmenutablinks");
-    for (i = 0; i < tablinks.length; i++) {
+    for (let i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
 
@@ -1445,6 +1529,10 @@ function changetopmenuselected(e, section) {
     if (document.getElementById(e.currentTarget.name + 'configurationdiv').classList.contains('storageconfigurationtabdiv')) {
         if (!document.getElementById(e.currentTarget.name + 'configurationdiv').classList.contains("configloaded")) {
             createconfvarsrequest(e.currentTarget.name + 'configurationdiv');
+        }
+    } else if (e.currentTarget.name == 'iamcontentroles') {
+        if (!document.getElementById('iamcontentrolesconfigurationdiv').classList.contains("configloaded")) {
+            getconfig('GetContentRoles');
         }
     } else if (e.currentTarget.name == 'iammgmtroles') {
         if (!document.getElementById('iammgmtrolesconfigurationdiv').classList.contains("configloaded")) {
@@ -1479,7 +1567,7 @@ function getiamsubformdata() {
         return;
     }
 
-    if (!document.getElementById("iammgmtrolesmenu").classList.contains('hidden')) {
+    if (!document.getElementById("iammgmtrolesmenu").classList.contains('hidden') || !document.getElementById("iamcontentrolesmenu").classList.contains('hidden') ) {
         getconfig('ListRoles');
         return;
     }
@@ -1494,7 +1582,7 @@ function selectedsidemenuchange(e) {
         let sidemenudivs = document.getElementById('sidemenu').getElementsByTagName('div');
         let a;
 
-        for (i = 0; i < sidemenudivs.length; i++) {
+        for (let i = 0; i < sidemenudivs.length; i++) {
             if (sidemenudivs[i].id != "sessiondetails" && sidemenudivs[i].className != "optiondisabled") {
                 sidemenudivs[i].className = "";
                 if (document.getElementById(sidemenudivs[i].id + 'div') !== null)
@@ -1532,7 +1620,6 @@ function CloseHttpFailedWindow() {
 }
 
 function updatestatuscirclediv(divid, newstatus) {
-    var statustext;
     var classname;
 
     switch (newstatus) {
@@ -1724,6 +1811,7 @@ function UpdateSystemStatus(newstatus) {
     updatestatusboxdiv('statustier1datathreshold', 'statustier1datathresholdtext', status.Tier1ThresholdLevel);
     updatestatusboxdiv('statustier2datathreshold', 'statustier2datathresholdtext', status.Tier2ThresholdLevel);
     updatestatusboxdiv('statustier3', 'statustier3text', status.Tier3Status);
+    updatestatusboxdiv('statuscontentserver', 'statuscontentserverstatustext', status.ContentWebServer);
     updatestatusboxdiv('statusiscsi', 'statusiscsitext', status.iSCSIStatus);
     updatestatusboxdiv('statusnfs', 'statusnfstext', status.NFSStatus);
     updatestatuscirclediv('statuscirclemanagedcapacity', status.ManagedCapacity);
@@ -1748,7 +1836,7 @@ function togglerootexportcheckboxes(e) {
 
     var rootexportcheckboxes = document.getElementsByName("nfsexportrootexport");
 
-    for (i = 0; i < rootexportcheckboxes.length; i++) {
+    for (let i = 0; i < rootexportcheckboxes.length; i++) {
         rootexportcheckboxes[i].checked = false;
     }
 
@@ -1763,7 +1851,7 @@ function togglefileselectedrow(selectedrow) {
 
     var filelistingrows = document.getElementById('fileselectlist').getElementsByClassName("selectedfilelistrow");
 
-    for (i = 0; i < filelistingrows.length; i++) {
+    for (let i = 0; i < filelistingrows.length; i++) {
         filelistingrows[i].className = ('notselectedfilelistrow');
     }
 
@@ -1790,16 +1878,17 @@ function closefileselect() {
 function returnfileselect() {
     var thepath = document.getElementById('fileselectnextpath').value;
     var selectedlisting = document.getElementById('fileselectlist').getElementsByClassName("selectedfilelistrow");
+    let selectedvalue; 
 
     if (selectedlisting.length == 0) {
-        var selectedvalue = thepath;
+        selectedvalue = thepath;
         thepath = '';
         if (selectedvalue.length > 1 && selectedvalue[selectedvalue.length - 1] == '/') {
             selectedvalue = selectedvalue.substring(0, selectedvalue.length - 1);
         }
     } else {
         var fileselectentry = document.getElementById(selectedlisting[0].id + 'value');
-        var selectedvalue = fileselectentry.innerHTML;
+        selectedvalue = fileselectentry.innerHTML;
     }
     var targetinput = document.getElementById('fileselecttargetid').value;
 
@@ -1841,15 +1930,16 @@ function updatefileselect(filelistjson) {
         listingtable += "<tr id='filelistrownexfsroot' class='" + entryclass + "' onclick='togglefileselectedrow(" + onclickentry + ")'><td class='fileselecttypeicon'><img src='/folderwithlogo.png'></td><td id='filelistrownexfsrootvalue' class='fileselectentry'>/</td></tr>";
         entryclass = 'notselectedfilelistrow';
     } else {
+        let quotedcurrententry; 
         if (fileselectcurrentfolder.length > 1) {
-            var quotedcurrententry = '"' + fileselectcurrentfolder + '"';
+            quotedcurrententry = '"' + fileselectcurrentfolder + '"';
         } else {
-            var quotedcurrententry = '""';
+            quotedcurrententry = '""';
         }
         listingtable += "<tr id='filelistrowshowpartent' class='notselectedfilelistrow' ondblclick='downdirlisting(" + quotedcurrententry + ")'><td class='fileselecttypeicon'><img src='/folderwithbackarrow.png' onclick='downdirlisting(" + quotedcurrententry + ")'></td><td class='fileselectentry'>..</td></tr>";
     }
 
-    listingentries.forEach((entry, index) => {
+    listingentries.forEach(function(entry) {
         if (depth == 0) {
             if (entry == currententry) {
                 entryclass = 'selectedfilelistrow';
@@ -1885,7 +1975,7 @@ function updatefileselect(filelistjson) {
     listingtable += '</table>';
 
     document.getElementById('fileselectlist').innerHTML = listingtable;
-    document.getElementById('fileselectcurrentpath').thepath;
+    /* document.getElementById('fileselectcurrentpath').value = thepath; */
     document.getElementById('fileselectcurrentfolder').value = thepath;
 }
 
@@ -1893,12 +1983,13 @@ function completegetconfsrequest(confjson) {
     const configs = confjson.Configs;
     const configkeys = Object.keys(configs);
 
-    configkeys.forEach((key, index) => {
+    configkeys.forEach(function(key) {
         const targetinput = document.getElementById(key);
+        let thetarget;
 
         if (targetinput != null) {
             if (targetinput.tagName == "INPUT") {
-                var thetarget = targetinput;
+                thetarget = targetinput;
 
                 if (thetarget.type == 'checkbox') {
                     if (configs[key].ConfigValue == "0") {
@@ -1922,13 +2013,13 @@ function completegetconfsrequest(confjson) {
                 thetarget.setAttribute('livevalue', configs[key].LiveValue);
                 thetarget.setAttribute('configurationvalue', configs[key].ConfigValue);
             } else if (targetinput.tagName == "SELECT") {
-                var thetarget = targetinput;
+                thetarget = targetinput;
                 thetarget.value = configs[key].ConfigValue;
                 thetarget.setAttribute('livevalue', configs[key].LiveValue);
                 thetarget.setAttribute('configurationvalue', configs[key].ConfigValue);
             } else if (targetinput.tagName == "TD") {
                 document.getElementById(key + configs[key].ConfigValue).checked = true;
-                var thetarget = document.getElementById(key + '0');
+                thetarget = document.getElementById(key + '0');
                 thetarget.setAttribute('livevalue', configs[key].LiveValue);
                 thetarget.setAttribute('configurationvalue', configs[key].ConfigValue);
             }
@@ -1947,7 +2038,7 @@ function completegetconfsrequest(confjson) {
 }
 
 function saveformconfvars(confform) {
-    vartoupdate = 0;
+    let vartoupdate = 0;
     var varname;
     var newvalue;
     var restart;
@@ -1962,7 +2053,7 @@ function saveformconfvars(confform) {
     let formselects = Array.from(document.getElementById(confform).getElementsByTagName('select'));
     const forminputs = forminput.concat(formselects);
 
-    for (i = 0; i < forminputs.length; i++) {
+    for (let i = 0; i < forminputs.length; i++) {
         if (forminputs[i].getAttribute('configurationvalue') != forminputs[i].value || forminputs[i].type == 'radio' || forminputs[i].type == 'checkbox') {
             if (forminputs[i].type == 'radio') {
                 if (forminputs[i].className != 'firstradio') {
@@ -1971,7 +2062,8 @@ function saveformconfvars(confform) {
                 let radios = document.getElementsByName(forminputs[i].name);
                 newvalue = forminputs[i].getAttribute('configurationvalue');
 
-                for (ii = 0; ii < radios.length; ii++) {
+                let ii;
+                for ( ii = 0; ii < radios.length; ii++) {
                     if (radios[ii].checked == true) {
                         newvalue = radios[ii].value;
                         break;
@@ -2010,6 +2102,11 @@ function saveformconfvars(confform) {
 
             if (vartoupdate == 1) {
                 json += ',';
+            }
+
+            if ( varname === "CONTENTWEBSERVERMAXCONNECTIONS" && document.getElementById('statuscontentserverstatustext').innerHTML == "OK" )
+            {
+                restart=1;
             }
 
             json += '{ "VarName": "' + varname + '",';
@@ -2060,7 +2157,7 @@ function validateconfigform(formtovalidate) {
     let forminputs = document.getElementById(formtovalidate).getElementsByTagName('input');
 
 
-    for (i = 0; i < forminputs.length; i++) {
+    for (let i = 0; i < forminputs.length; i++) {
         if (forminputs[i].getAttribute('validate') == 'true') {
             if (forminputs[i].checkValidity() == false) {
                 document.getElementById('update' + formtovalidate).className = 'buttondisabled';
@@ -2107,7 +2204,6 @@ function createfileselect() {
 }
 
 function validatefileedit() {
-    var valid = 1;
 
     if (document.getElementById('editfilename').checkValidity() == false || document.getElementById('editfilesize').checkValidity() == false || document.getElementById('editfilechunksize').checkValidity() == false) {
         document.getElementById('saveeditfilebutton').className = 'buttondisabled';
@@ -2121,7 +2217,7 @@ function ifcheckedenablevrequired(checkelements, valiationelements, validatevalu
     const velements = valiationelements.split(",");
     let validate = 0;
 
-    for (i = 0; i < celements.length; i++) {
+    for (let i = 0; i < celements.length; i++) {
         if (document.getElementById(celements[i]).checked == validatevalue) {
             validate = 1;
             break;
@@ -2129,11 +2225,11 @@ function ifcheckedenablevrequired(checkelements, valiationelements, validatevalu
     }
 
     if (validate == 0) {
-        for (i = 0; i < velements.length; i++) {
+        for (let i = 0; i < velements.length; i++) {
             document.getElementById(velements[i]).setAttribute('validate', 'false');
         }
     } else {
-        for (i = 0; i < velements.length; i++) {
+        for (let i = 0; i < velements.length; i++) {
             document.getElementById(velements[i]).setAttribute('validate', 'true');
         }
     }
@@ -2147,7 +2243,7 @@ function makeformelementsreadonly(confform) {
 
     let forminputs = document.getElementById(confform).getElementsByTagName('input');
 
-    for (i = 0; i < forminputs.length; i++) {
+    for (let i = 0; i < forminputs.length; i++) {
         forminputs[i].disabled = true;
     }
 }
@@ -2156,7 +2252,7 @@ function makeformelementschangeable(confform) {
 
     let forminputs = document.getElementById(confform).getElementsByTagName('input');
 
-    for (i = 0; i < forminputs.length; i++) {
+    for (let i = 0; i < forminputs.length; i++) {
         forminputs[i].disabled = false;
     }
 }
@@ -2172,11 +2268,11 @@ function ActivateSessionPermissions(sessionpermissions) {
     const optionids = ['systemstatus', 'nexfsconfiguration', 'nfs', 'iscsi', 'license', 'servicemanagement', 'pausenexfs', 'enableiscsi', 'enablenfs', 'managenfs', 'iam'];
 
 
-    for (optionform of optiondisableforms) {
+    for (let optionform of optiondisableforms) {
         makeformelementsreadonly(optionform);
     }
 
-    for (optionid of optionids) {
+    for (let optionid of optionids) {
         if (document.getElementById(optionid) != null) {
             document.getElementById(optionid).classList.add("optiondisabled");
         }
@@ -2186,17 +2282,24 @@ function ActivateSessionPermissions(sessionpermissions) {
     document.getElementById("filepermissions").setAttribute('ListFiles', '0');
     document.getElementById("filepermissions").setAttribute('CreateDirectories', '0');
     document.getElementById("filepermissions").setAttribute('CreateFiles', '0');
-    document.getElementById("rolepermissions").setAttribute('ListRoles', '0');
-    document.getElementById("rolepermissions").setAttribute('DeleteRoles', '0');
-    document.getElementById("rolepermissions").setAttribute('UpdateRoles', '0');
+    document.getElementById("iammgmtrolepermissions").setAttribute('ListManagementRoles', '0');
+    document.getElementById("iammgmtrolepermissions").setAttribute('DeleteRoles', '0');
+    document.getElementById("iammgmtrolepermissions").setAttribute('UpdateRoles', '0');
+    document.getElementById("iamcontentrolepermissions").setAttribute('DeleteRoles', '0');
+    document.getElementById("iamcontentrolepermissions").setAttribute('UpdateRoles', '0');
+    document.getElementById("iamcontentrolepermissions").setAttribute('ListContentRoles', '0');
     document.getElementById("iammgmtrolesadd").className = 'buttondisabled';
     document.getElementById("iammgmtrolesmenu").classList.add('hidden');
+    document.getElementById("iamcontentrolesadd").className = 'buttondisabled';
+    document.getElementById("iamcontentrolesmenu").classList.add('hidden');
     document.getElementById("useradminpermissions").setAttribute('GetUser', '0');
     document.getElementById("useradminpermissions").setAttribute('UpdateUsers', '0');
     document.getElementById("iamaccountsmenu").classList.add('hidden');
     document.getElementById("iamsecretkeymenu").classList.add('hidden');
     document.getElementById("iameditusersecret").disabled = true;
     document.getElementById("iameditusersecret").required = false;
+    document.getElementById("iameditusercontentsecret").disabled = true;
+    document.getElementById("iameditusercontentsecret").required = false;
     document.getElementById("iamaccountadd").className = 'buttondisabled';
 
     const actions = sessionpermissions.Statement.find(e => e.Effect == 'Allow').Action;
@@ -2235,6 +2338,9 @@ function ActivateSessionPermissions(sessionpermissions) {
         } else if (action == 'iam:GetManagementRoles') {
             document.getElementById('iam').classList.remove("optiondisabled");
             getconfig('ListAllManagementActions');
+        } else if (action == 'nexfs:GetContentRoles') {
+            document.getElementById('iam').classList.remove("optiondisabled");
+            getconfig('ListAllContentActions');
         } else if (action == 'nexfs:PauseServer') {
             document.getElementById('servicemanagement').classList.remove("optiondisabled");
             document.getElementById('NEXFSPAUSED').disabled = false;
@@ -2260,29 +2366,41 @@ function ActivateSessionPermissions(sessionpermissions) {
         } else if (action == 'iam:UpdateOtherUserSecret') {
             document.getElementById('iam').classList.remove("optiondisabled");
             document.getElementById("iameditusersecret").disabled = false;
-            document.getElementById("iameditusersecret").required = true;
+            document.getElementById("iamaccountadd").className = 'button';
+        } else if (action == 'iam:UpdateOtherUserContentSecret') {
+            document.getElementById('iam').classList.remove("optiondisabled");
+            document.getElementById("iameditusercontentsecret").disabled = false;
             document.getElementById("iamaccountadd").className = 'button';
         } else if (action == 'iam:UpdateOwnSecret') {
             document.getElementById('iam').classList.remove("optiondisabled");
             document.getElementById("iamsecretkeymenu").classList.remove('hidden');
-        } else if (action == 'iam:ListRoles') {
+        } else if (action == 'nexfs:DeleteContenttRoles') {
             document.getElementById('iam').classList.remove("optiondisabled");
-            document.getElementById("rolepermissions").setAttribute('ListRoles', '1');
+            document.getElementById("iamcontentrolepermissions").setAttribute('DeleteRoles', '1');
         } else if (action == 'iam:DeleteManagementRoles') {
             document.getElementById('iam').classList.remove("optiondisabled");
-            document.getElementById("rolepermissions").setAttribute('DeleteRoles', '1');
+            document.getElementById("iammgmtrolepermissions").setAttribute('DeleteRoles', '1');
         } else if (action == 'iam:ListManagementRoles') {
             document.getElementById('iam').classList.remove("optiondisabled");
             document.getElementById("iammgmtrolesmenu").classList.remove('hidden');
+            document.getElementById("iammgmtrolepermissions").setAttribute('ListManagementRoles', '1');
+        } else if (action == 'nexfs:ListContentRoles') {
+            document.getElementById('iam').classList.remove("optiondisabled");
+            document.getElementById("iamcontentrolesmenu").classList.remove('hidden');
+            document.getElementById("iamcontentrolepermissions").setAttribute('ListContentRoles', '1');
+        } else if (action == 'nexfs:UpdateContentRoles') {
+            document.getElementById('iam').classList.remove("optiondisabled");
+            document.getElementById("iamcontentrolepermissions").setAttribute('UpdateRoles', '1');
+            document.getElementById("iamcontentrolesadd").className = 'button';
         } else if (action == 'iam:UpdateManagementRoles') {
             document.getElementById('iam').classList.remove("optiondisabled");
-            document.getElementById("rolepermissions").setAttribute('UpdateRoles', '1');
+            document.getElementById("iammgmtrolepermissions").setAttribute('UpdateRoles', '1');
             document.getElementById("iammgmtrolesadd").className = 'button';
         }
     }
 
     if (document.getElementById('havesession').value == "0") {
-        for (optionid of optionids) {
+        for (let optionid of optionids) {
             var option = document.getElementById(optionid);
             if (option != null) {
                 if (option.classList.contains('optiondisabled')) {
@@ -2382,13 +2500,27 @@ function RequestComplete() {
                     }
                 }
             } else if (requesturl.includes('Action=GetManagementRoles')) {
-                completeiamgetmgmtrolesrequest(JSON.parse(RequestStatus.responseText));
+                completeiamgetrolesrequest('iammgmt',JSON.parse(RequestStatus.responseText));
+            } else if (requesturl.includes('Action=GetContentRoles')) {
+                completeiamgetrolesrequest('iamcontent',JSON.parse(RequestStatus.responseText));
             } else if (requesturl.includes('Action=DeleteRole')) {
-                completeiamgetmgmtroledeleterequest(RequestStatus.responseXML);
+                completeiamroledeleterequest(RequestStatus.responseXML);
             } else if (requesturl.includes('Action=CreateRole')) {
-                completeiamgetmgmtrolecreaterequest(RequestStatus.responseXML);
+                if (requesturl.includes('RoleType=iam')) {
+                  completeiamrolecreaterequest(RequestStatus.responseXML,'iammgmt');
+                }
+                else
+                {
+                  completeiamrolecreaterequest(RequestStatus.responseXML,'iamcontent');
+                }
             } else if (requesturl.includes('Action=SaveRole')) {
-                completeiamgetmgmtrolesaverequest(RequestStatus.responseXML);
+                if (requesturl.includes('RoleType=iam')) {
+                  completeiamrolesaverequest(RequestStatus.responseXML,'iammgmt');
+                }
+                else
+                {
+                  completeiamrolesaverequest(RequestStatus.responseXML,'iamcontent');
+                }
             } else if (requesturl.includes('Action=ListRoles')) {
                 completeiamgetmgmtlistrolesrequest(RequestStatus.responseXML);
             } else if (requesturl.includes('Action=ChangePassword')) {
@@ -2396,15 +2528,17 @@ function RequestComplete() {
             } else if (requesturl.includes('Action=GetUser')) {
                 completeiamgetmgmtgetuserrequest(RequestStatus.responseXML);
             } else if (requesturl.includes('Action=CreateUser')) {
-                completeiamgetmgmtcreateuserrequest(RequestStatus.responseXML);
+                completeiamgetmgmtcreateuserrequest('CreateUser');
             } else if (requesturl.includes('Action=DeleteUser')) {
-                completeiamgetmgmtcreateuserrequest(RequestStatus.responseXML);
+                completeiamgetmgmtcreateuserrequest('DeleteUser');
             } else if (requesturl.includes('Action=UpdateUser')) {
-                completeiamgetmgmtupdateuserrequest(RequestStatus.responseXML);
+                completeiamgetmgmtupdateuserrequest();
             } else if (requesturl.includes('Action=ListUsers')) {
                 completeiamgetmgmtlistusersrequest(RequestStatus.responseXML);
             } else if (requesturl.includes('Action=ListAllManagementActions')) {
                 storemanagmentactions(JSON.parse(RequestStatus.responseText));
+            } else if (requesturl.includes('Action=ListAllContentActions')) {
+                storecontentactions(JSON.parse(RequestStatus.responseText));
             } else if (requesturl.includes('Action=GetISCSIConf')) {
                 completeiscsigetrequest(JSON.parse(RequestStatus.responseText));
             } else if (requesturl.includes('Action=PutISCSIConf')) {
@@ -2455,13 +2589,24 @@ function enableiscsitargetbuttons() {
     enableiscsibuttons('iscsitarget');
 }
 
-function updatemgmtroleactionselects(roleid) {
 
-    var optionfound = 0;
-    const actionselects = ["iammgmtrolesallowed" + roleid, "iammgmtrolesdenied" + roleid];
+function updateroleactionselects(roletype, roleid) {
+
+    let optionfound = 0;
+    let roleactions;
+    const actionselects = [roletype+"rolesallowed" + roleid, roletype + "rolesdenied" + roleid];
+
+    if (roletype == 'iammgmt' ) 
+    {
+      roleactions=mgmtactions;
+    }
+    else if ( roletype == 'iamcontent' )
+    {
+        roleactions=contentactions;
+    }
 
     for (let i = 0; i < actionselects.length; i++) {
-        mgmtactions.forEach((entry, index) => {
+        roleactions.forEach(function(entry) {
 
             optionfound = 0;
             Array.from(document.querySelector("#" + actionselects[i]).options).forEach(function(option_element) {
@@ -2481,7 +2626,7 @@ function updatemgmtroleactionselects(roleid) {
                     function(e) {
                         var el = e.target;
                         e.preventDefault();
-                        if (document.getElementById("rolepermissions").getAttribute('UpdateRoles') == '0') {
+                        if (document.getElementById(roletype + "rolepermissions").getAttribute('UpdateRoles') == '0') {
                             return;
                         }
 
@@ -2491,7 +2636,7 @@ function updatemgmtroleactionselects(roleid) {
                         } else {
                             this.selected = true;
                         }
-                        enableiammgmtrolebuttons(roleid);
+                        enablerolebuttons(roletype, roleid);
                         el.parentNode.scrollTop = scrollTop;
                         return false;
                     }, false);
@@ -2503,7 +2648,7 @@ function updatemgmtroleactionselects(roleid) {
         Array.from(document.querySelector("#" + actionselects[i]).options).forEach(function(option_element) {
             selectidx++;
             optionfound = 0;
-            mgmtactions.forEach((entry, index) => {
+            roleactions.forEach(function(entry) {
                 if (option_element.value == entry) {
                     optionfound = 1;
                 }
@@ -2516,7 +2661,7 @@ function updatemgmtroleactionselects(roleid) {
     }
 }
 
-function roleactionoption(theactionselect, theactionvalue, selected, multiselect) {
+function roleactionoption(theactionselect, theactionvalue, roleid, roletype, selected, multiselect) {
     let newoption = document.createElement("option");
 
     newoption.value = theactionvalue;
@@ -2537,36 +2682,37 @@ function roleactionoption(theactionselect, theactionvalue, selected, multiselect
                 } else {
                     this.selected = true;
                 }
+                enablerolebuttons(roletype, roleid);
                 return false;
             }, false);
     }
 }
 
-function completeiamgetmgmtrolecreaterequest(response) {
+function completeiamrolecreaterequest(response, roletype) {
     let RequestCompleted = response.getElementsByTagName("RequestCompleted")[0];
     let CreateRoleResponse = RequestCompleted.getElementsByTagName("CreateRoleResponse")[0];
     let CreateRoleResult = CreateRoleResponse.getElementsByTagName("CreateRoleResult")[0];
     let Role = CreateRoleResult.getElementsByTagName("Role")[0];
     let roleid = Role.getElementsByTagName("RoleId")[0].childNodes[0].nodeValue;
 
-    document.getElementById('iammgmtrolesave' + roleid).innerHTML = "<center>Save Role</center>";
-    document.getElementById('iammgmtrolesave' + roleid).className = "buttondisabled";
-    document.getElementById('iammgmtrole' + roleid).setAttribute('newrole', 0);
+    document.getElementById(roletype+'rolesave' + roleid).innerHTML = "<center>Save Role</center>";
+    document.getElementById(roletype+'rolesave' + roleid).className = "buttondisabled";
+    document.getElementById(roletype+'role' + roleid).setAttribute('newrole', 0);
 }
 
-function completeiamgetmgmtrolesaverequest(response) {
+function completeiamrolesaverequest(response, roletype) {
     let RequestCompleted = response.getElementsByTagName("RequestCompleted")[0];
     let CreateRoleResponse = RequestCompleted.getElementsByTagName("SaveRoleResponse")[0];
     let CreateRoleResult = CreateRoleResponse.getElementsByTagName("SaveRoleResult")[0];
     let Role = CreateRoleResult.getElementsByTagName("Role")[0];
     let roleid = Role.getElementsByTagName("RoleId")[0].childNodes[0].nodeValue;
 
-    document.getElementById('iammgmtrolesave' + roleid).className = "buttondisabled";
-    document.getElementById('iammgmtrole' + roleid).setAttribute('newrole', 0);
+    document.getElementById(roletype+'rolesave' + roleid).className = "buttondisabled";
+    document.getElementById(roletype+'role' + roleid).setAttribute('newrole', 0);
 }
 
-function addmgmtroletoiamedituser(therole, selected) {
-    let iamroleselect = document.getElementById('iameditusermgmtroleselect');
+function addmgmtroletoiamedituser(therole, selected, theselect) {
+    let iamroleselect = document.getElementById(theselect);
     let newoption = document.createElement("option");
     newoption.value = therole;
     newoption.text = newoption.value;
@@ -2611,61 +2757,129 @@ function completeiamgetmgmtlistrolesrequest(response) {
     let RoleList = ListRolesResults.getElementsByTagName("Roles")[0];
     let members = RoleList.getElementsByTagName("member");
 
-    let iamroleselect = document.getElementById('iameditusermgmtroleselect');
-
+    let iammgmtroleselect = document.getElementById('iameditusermgmtroleselect');
+    let iamcontentroleselect = document.getElementById('iamedituserroleselect');
 
     for (let role = 0; role < members.length; role++) {
         let rolefound = 0;
-        for (let loop = 0; loop < iamroleselect.options.length; loop++) {
-            if (iamroleselect.options[loop].value == members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue) {
-                rolefound = 1;
-                break;
+        for (let loop = 0; loop < iammgmtroleselect.options.length; loop++) {
+            if ( members[role].getElementsByTagName('Path')[0].childNodes[0].nodeValue.startsWith("/iam/") )
+            {
+              if (iammgmtroleselect.options[loop].value == members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue) {
+                  rolefound = 1;
+                  break;
+              }
             }
         }
-        if (rolefound == 0) {
-            addmgmtroletoiamedituser(members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue, false);
+        if (rolefound == 0 && members[role].getElementsByTagName('Path')[0].childNodes[0].nodeValue.startsWith("/iam/") )  {
+            addmgmtroletoiamedituser(members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue, false,'iameditusermgmtroleselect');
         }
     }
 
-    for (let loop = iamroleselect.options.length - 1; loop >= 0; loop--) {
+    for (let role = 0; role < members.length; role++) {
+        let rolefound = 0;
+        for (let loop = 0; loop < iamcontentroleselect.options.length; loop++) {
+            if ( members[role].getElementsByTagName('Path')[0].childNodes[0].nodeValue.startsWith("/s3/") )
+            {
+              if (iamcontentroleselect.options[loop].value == members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue) {
+                  rolefound = 1;
+                  break;
+              }
+            }
+        }
+
+        if (rolefound == 0 && members[role].getElementsByTagName('Path')[0].childNodes[0].nodeValue.startsWith("/s3/") )  {
+            addmgmtroletoiamedituser(members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue, false,'iamedituserroleselect');
+        }
+    }
+
+    for (let loop = iammgmtroleselect.options.length - 1; loop >= 0; loop--) {
         let rolefound = 0;
 
-        for (role = 0; role < members.length; role++) {
-            if (iamroleselect.options[loop].value == members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue) {
+        for (let role = 0; role < members.length; role++) {
+            if (iammgmtroleselect.options[loop].value == members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue && 
+                members[role].getElementsByTagName('Path')[0].childNodes[0].nodeValue.startsWith("/iam/")) {
                 rolefound = 1;
                 break;
             }
         }
 
         if (rolefound == 0) {
-            iamroleselect.remove(loop);
+            iammgmtroleselect.remove(loop);
+        }
+    }
+
+    for (let loop = iamcontentroleselect.options.length - 1; loop >= 0; loop--) {
+        let rolefound = 0;
+
+        for (let role = 0; role < members.length; role++) {
+            if (iamcontentroleselect.options[loop].value == members[role].getElementsByTagName('RoleName')[0].childNodes[0].nodeValue && 
+                members[role].getElementsByTagName('Path')[0].childNodes[0].nodeValue.startsWith("/s3/")) {
+                rolefound = 1;
+                break;
+            }
+        }
+
+        if (rolefound == 0) {
+            iamcontentroleselect.remove(loop);
         }
     }
 }
 
-function completeiamgetmgmtupdateuserrequest(response) {
+function completeiamgetmgmtupdateuserrequest() {
     document.getElementById('iamedituserdiv').classList.add('hidden');
     document.getElementById('iameditusersecret').value = '';
+    document.getElementById('iameditusercontentsecret').value = '';
     loadiamaccounts();
 
     const UserId = document.getElementById('iamedituserid').value;
-    const roles = document.getElementById('iameditusermgmtroleselect');
+    const mgmtroles = document.getElementById('iameditusermgmtroleselect');
+
+    for (let role = 0; role < mgmtroles.options.length; role++) {
+        let rolewasselected = mgmtroles.options[role].getAttribute('wasselected');
+
+        if (mgmtroles.options[role].selected && rolewasselected == "0") {
+            sendattachuserrole(UserId, mgmtroles.options[role].value, 'iam');
+        } else if ((!mgmtroles.options[role].selected) && rolewasselected == "1") {
+            senddetachuserrole(UserId, mgmtroles.options[role].value, 'iam');
+        }
+    }
+
+    const roles = document.getElementById('iamedituserroleselect');
 
     for (let role = 0; role < roles.options.length; role++) {
         let rolewasselected = roles.options[role].getAttribute('wasselected');
 
         if (roles.options[role].selected && rolewasselected == "0") {
-            sendattachuserrole(UserId, roles.options[role].value);
+            sendattachuserrole(UserId, roles.options[role].value, 'user' );
         } else if ((!roles.options[role].selected) && rolewasselected == "1") {
-            senddetachuserrole(UserId, roles.options[role].value);
+            senddetachuserrole(UserId, roles.options[role].value, 'user' );
         }
     }
+    
 }
 
-function completeiamgetmgmtcreateuserrequest(response) {
+function completeiamgetmgmtcreateuserrequest(requesttype) {
     document.getElementById('iamedituserdiv').classList.add('hidden');
     document.getElementById('iameditusersecret').value = '';
+    document.getElementById('iameditusercontentsecret').value = '';
     loadiamaccounts();
+
+    if ( requesttype === 'CreateUser' ) {
+        const UserId = document.getElementById('iamedituserid').value;
+        const roles = document.getElementById('iamedituserroleselect');
+    
+        for (let role = 0; role < roles.options.length; role++) {
+            let rolewasselected = roles.options[role].getAttribute('wasselected');
+    
+            if (roles.options[role].selected && rolewasselected == "0") {
+                sendattachuserrole(UserId, roles.options[role].value, 'user' );
+            } else if ((!roles.options[role].selected) && rolewasselected == "1") {
+                senddetachuserrole(UserId, roles.options[role].value, 'user' );
+            }
+        }
+    }
+
 }
 
 function completeiamgetmgmtgetuserrequest(response) {
@@ -2673,7 +2887,7 @@ function completeiamgetmgmtgetuserrequest(response) {
     let GetUserResponse = RequestCompleted.getElementsByTagName("GetUserResponse")[0];
     let GetUserResult = GetUserResponse.getElementsByTagName("GetUserResult")[0];
     let User = GetUserResult.getElementsByTagName("User")[0];
-    let Roles = User.getElementsByTagName("Roles")[0];
+    /* let Roles = User.getElementsByTagName("Roles")[0]; */
 
     document.getElementById('iamedituserid').value = User.getElementsByTagName('UserId')[0].childNodes[0].nodeValue;
     document.getElementById('orguserid').value = User.getElementsByTagName('UserId')[0].childNodes[0].nodeValue;
@@ -2685,6 +2899,14 @@ function completeiamgetmgmtgetuserrequest(response) {
     }
 
     document.getElementById('iameditusername').value = User.getElementsByTagName('UserName')[0].childNodes[0].nodeValue;
+
+    if (User.getElementsByTagName('UserPOSIXUID')[0].childNodes.length > 0) {
+        document.getElementById('iamedituserposixuid').value = User.getElementsByTagName('UserPOSIXUID')[0].childNodes[0].nodeValue;
+    }
+
+    if (User.getElementsByTagName('UserPOSIXGID')[0].childNodes.length > 0) {
+        document.getElementById('iamedituserposixgid').value = User.getElementsByTagName('UserPOSIXGID')[0].childNodes[0].nodeValue;
+    }
 
     if (User.getElementsByTagName('UserEmail')[0].childNodes.length > 0) {
         document.getElementById('iamedituseremail').value = User.getElementsByTagName('UserEmail')[0].childNodes[0].nodeValue;
@@ -2699,14 +2921,20 @@ function completeiamgetmgmtgetuserrequest(response) {
     }
     document.getElementById('iamedituserauthmethod').value = User.getElementsByTagName('AuthenicationMethod')[0].childNodes[0].nodeValue;
 
-    let roles = User.getElementsByTagName('Roles')[0].getElementsByTagName('Role');
+    let contentroles = User.getElementsByTagName('Roles')[0].getElementsByTagName('Role');
+    let mgmtroles = User.getElementsByTagName('Roles')[0].getElementsByTagName('MgmtRole');
     document.getElementById('iameditusermgmtroleselect').options.length = 0;
+    document.getElementById('iamedituserroleselect').options.length = 0;
 
-    for (let loop = 0; loop < roles.length; loop++) {
-        addmgmtroletoiamedituser(roles[loop].childNodes[0].nodeValue, true);
+    for (let loop = 0; loop < mgmtroles.length; loop++) {
+        addmgmtroletoiamedituser(mgmtroles[loop].childNodes[0].nodeValue, true,'iameditusermgmtroleselect');
     }
 
-    if (document.getElementById("rolepermissions").getAttribute('ListRoles') == '1') {
+    for (let loop = 0; loop < contentroles.length; loop++) {
+        addmgmtroletoiamedituser(contentroles[loop].childNodes[0].nodeValue, true,'iamedituserroleselect');
+    }
+
+    if (document.getElementById("iammgmtrolepermissions").getAttribute('ListManagementRoles') == '1' || document.getElementById("iamcontentrolepermissions").getAttribute('ListContentRoles') == '1' ) {
         getconfig('ListRoles');
     }
 
@@ -2737,69 +2965,70 @@ function completeiamgetmgmtlistusersrequest(response) {
     }
 }
 
-function completeiamgetmgmtroledeleterequest(response) {
+function completeiamroledeleterequest(response) {
     let roleid = response.getElementsByTagName("RequestCompleted")[0].getElementsByTagName("RoleId")[0].childNodes[0].nodeValue;
     let mgmtrole = document.getElementById('iammgmtrole' + roleid);
     mgmtrole.parentNode.removeChild(mgmtrole);
 }
 
-function deleteiammgmtrole(roleid) {
-    if (confirm("Are you sure you want to delete management role " + roleid + "?") == false) {
+function deleterole(roletype,roleid) {
+    if (confirm("Are you sure you want to delete roleid " + roleid + "?") == false) {
         return;
     }
-    let mgmtrole = document.getElementById('iammgmtrole' + roleid);
+    let therole = document.getElementById(roletype+ 'role' + roleid);
 
-    if (mgmtrole.getAttribute('newrole') == '0') {
-        senddeleterole(document.getElementById('iammgmtrolename' + roleid).value, document.getElementById('iammgmtroleversion' + roleid).value);
+    if (therole.getAttribute('newrole') == '0') {
+        senddeleterole(roletype, document.getElementById(roletype+'rolename' + roleid).value, document.getElementById(roletype+'roleversion' + roleid).value);
         return;
     }
 
-    mgmtrole.parentNode.removeChild(mgmtrole);
+    therole.parentNode.removeChild(therole);
 }
 
-function completeiamgetmgmtrolesrequest(rolesjson) {
+
+function completeiamgetrolesrequest(roletype, rolesjson) {
     const roleslist = rolesjson.Roles;
 
     if (roleslist == null) {
         return;
     }
 
-    document.getElementById('iammgmtrolesdiv').innerHTML = '';
+    document.getElementById(roletype+'rolesdiv').innerHTML = '';
 
-    const iamroles = Object.keys(roleslist);
+    /* const iamroles = Object.keys(roleslist); */
 
     for (let role = 0; role < roleslist.length; role++) {
-        let roleid = iammgmtrolesadd(roleslist[role].RoleId);
+        let roleid = iamrolesadd(roletype,roleslist[role].RoleId);
         let actionbox = '';
-        document.getElementById('iammgmtrolename' + roleid).value = roleslist[role].RoleName;
-        document.getElementById('iammgmtrole' + roleid).setAttribute('newrole', '0');
+        document.getElementById(roletype+'rolename' + roleid).value = roleslist[role].RoleName;
+        document.getElementById(roletype+'role' + roleid).setAttribute('newrole', '0');
         if (roleslist[role].Enabled == '1') {
-            document.getElementById('iammgmtroleenabled' + roleid).checked = true;
+            document.getElementById(roletype+'roleenabled' + roleid).checked = true;
         } else {
-            document.getElementById('iammgmtroleenabled' + roleid).checked = false;
+            document.getElementById(roletype+'roleenabled' + roleid).checked = false;
         }
-        document.getElementById('iammgmtroleversion' + roleid).value = roleslist[role].Policy.Version;
+        document.getElementById(roletype+'roleversion' + roleid).value = roleslist[role].Policy.Version;
         for (let statement = 0; statement < roleslist[role].Policy.Statement.length; statement++) {
             if (roleslist[role].Policy.Statement[statement].Effect == 'Allow') {
-                document.getElementById('iammgmtroleallowedsid' + roleid).value = roleslist[role].Policy.Statement[statement].Sid;
-                actionbox = 'iammgmtrolesallowed' + roleid;
+                document.getElementById(roletype+'roleallowedsid' + roleid).value = roleslist[role].Policy.Statement[statement].Sid;
+                actionbox = roletype+'rolesallowed' + roleid;
             } else if (roleslist[role].Policy.Statement[statement].Effect == 'Deny') {
-                document.getElementById('iammgmtroledeniedsid' + roleid).value = roleslist[role].Policy.Statement[statement].Sid;
-                actionbox = 'iammgmtrolesdenied' + roleid;
+                document.getElementById(roletype+'roledeniedsid' + roleid).value = roleslist[role].Policy.Statement[statement].Sid;
+                actionbox = roletype + 'rolesdenied' + roleid;
             } else {
                 continue;
             }
 
             for (let action = 0; action < roleslist[role].Policy.Statement[statement].Action.length; action++) {
-                roleactionoption(actionbox, roleslist[role].Policy.Statement[statement].Action[action], true, true);
+                roleactionoption(actionbox, roleslist[role].Policy.Statement[statement].Action[action], roleid, roletype, true, true);
             }
         }
-        updatemgmtroleactionselects(roleid);
-        document.getElementById('iammgmtrolesave' + roleid).innerHTML = '<center>Save Role</center>';
+        updateroleactionselects(roletype,roleid);
+        document.getElementById(roletype + 'rolesave' + roleid).innerHTML = '<center>Save Role</center>';
     }
 
-    if (!document.getElementById('iammgmtrolesconfigurationdiv').classList.contains("configloaded")) {
-        document.getElementById('iammgmtrolesconfigurationdiv').classList.add("configloaded");
+    if (!document.getElementById(roletype+'rolesconfigurationdiv').classList.contains("configloaded")) {
+        document.getElementById(roletype+'rolesconfigurationdiv').classList.add("configloaded");
     }
 }
 
@@ -2812,13 +3041,13 @@ function updateiscsitargets(iscsijson) {
 
     const iscsitargets = Object.keys(iscsitargetlist);
     const iscsibindingslist = iscsijson.bindings;
+    let iscsibindings;
 
     if (iscsibindingslist != null) {
-        var iscsibindings = Object.keys(iscsibindingslist);
+        iscsibindings = Object.keys(iscsibindingslist);
     } else {
-        var iscsibindings = [];
+        iscsibindings = [];
     }
-    var targetid = 0;
     var lunid = 0;
 
     document.getElementById('iscsitargetsdiv').innerHTML = "";
@@ -2859,19 +3088,19 @@ function updateiscsitargets(iscsijson) {
 
     }
 
-    for (thebinding = 0; thebinding < iscsibindings.length; thebinding++) {
+    for (let thebinding = 0; thebinding < iscsibindings.length; thebinding++) {
         var binding = iscsibindingslist[thebinding].binding.bindto;
         var bindtocount = binding.length;
 
         let targetid = iscsibindingslist[thebinding].binding.tid;
-        for (bindto = 0; bindto < bindtocount; bindto++) {
+        for (let bindto = 0; bindto < bindtocount; bindto++) {
             targetaddoption('iscsitargetinterfaces' + targetid, binding[bindto].address, true, true);
         }
 
         var accountbinding = iscsibindingslist[thebinding].binding.accounts;
         var bindingaccountcount = accountbinding.length;
 
-        for (account = 0; account < bindingaccountcount; account++) {
+        for (let account = 0; account < bindingaccountcount; account++) {
             if (accountbinding[account].mode == 'add') {
                 targetaddoption('iscsiinboundaccounts' + targetid, accountbinding[account].username, true, true);
             } else {
@@ -2906,6 +3135,19 @@ function storemanagmentactions(actionjson) {
     mgmtactions = themgmtactions.sort();
 }
 
+var contentactions = [];
+
+function storecontentactions(actionjson) {
+
+    let thecontentactions = [];
+    const actionlist = actionjson.Actions;
+
+    for (let action = 0; action < actionlist.length; action++) {
+        thecontentactions[action] = actionlist[action];
+    }
+    contentactions = thecontentactions.sort();
+}
+
 function updateiscsiaccountlistselect(iscsijson) {
     var updaterow = document.getElementById('iscsitargetsdiv').getAttribute('updatingid');
 
@@ -2918,7 +3160,7 @@ function updateiscsiaccountlistselect(iscsijson) {
     const iscsiaccountlist = iscsijson.accounts;
     const iscsiaccounts = Object.keys(iscsiaccountlist);
     for (let i = 0; i < accountselects.length; i++) {
-        iscsiaccounts.forEach((entry, index) => {
+        iscsiaccounts.forEach(function(entry) {
 
             optionfound = 0;
             Array.from(document.querySelector("#" + accountselects[i] + updaterow).options).forEach(function(option_element) {
@@ -2957,7 +3199,7 @@ function updateiscsiaccountlistselect(iscsijson) {
         Array.from(document.querySelector("#" + accountselects[i] + updaterow).options).forEach(function(option_element) {
             selectidx++;
             optionfound = 0;
-            iscsiaccounts.forEach((entry, index) => {
+            iscsiaccounts.forEach(function(entry) {
                 if (option_element.value == iscsiaccountlist[entry].account.username) {
                     optionfound = 1;
                 }
@@ -2981,7 +3223,7 @@ function updateiscsiinterfacelistselect(iscsijson) {
     var optionfound = 0;
     const iscsiinterfacelist = iscsijson.interfaces;
     const iscsiinterfaces = Object.keys(iscsiinterfacelist);
-    iscsiinterfaces.forEach((entry, index) => {
+    iscsiinterfaces.forEach(function(entry) {
 
         optionfound = 0;
         Array.from(document.querySelector("#iscsitargetinterfaces" + updaterow).options).forEach(function(option_element) {
@@ -3022,7 +3264,7 @@ function updateiscsiinterfacelistselect(iscsijson) {
     Array.from(document.querySelector("#iscsitargetinterfaces" + updaterow).options).forEach(function(option_element) {
         selectidx++;
         optionfound = 0;
-        iscsiinterfaces.forEach((entry, index) => {
+        iscsiinterfaces.forEach(function(entry) {
             if (option_element.value == iscsiinterfacelist[entry].interface.address) {
                 optionfound = 1;
                 interfacecount++;
@@ -3131,59 +3373,69 @@ function createrequesttoken(reqinfo) {
     const region = "nexfs";
     const service = "nexfsconsoleapi";
     const debug = 0;
+    let login;
+    let password;
 
     if (reqinfo.mgmttoken == 1) {
-        var login = document.getElementById('username').value;
-        var password = CryptoMD5.MD5(document.getElementById('password').value).toString(CryptoMD5.enc.Hex);
+        login = document.getElementById('username').value;
+        password = CryptoMD5.MD5(document.getElementById('password').value).toString(CryptoMD5.enc.Hex);
     } else {
-        var login = document.getElementById('ka').value;
-        var password = document.getElementById('ks').value
+        login = document.getElementById('ka').value;
+        password = document.getElementById('ks').value;
     }
 
     if (login.length == 0 || password.length == 0)
         return (null);
 
-    var payload_hash = new CryptoSHA256.SHA256("").toString(CryptoSHA256.enc.Hex);
-    var signing_key = new getSignatureKey(password, reqinfo.datestamp, region, service);
+    reqinfo.contentsha256 = new CryptoSHA256.SHA256("").toString(CryptoSHA256.enc.Hex);
+    let signing_key = new getSignatureKey(password, reqinfo.datestamp, region, service);
 
-    var canonical_headers = 'host:' + window.location.hostname + '\\nx-amz-content-sha256:' + payload_hash + '\\nx-amz-date:' + reqinfo.amzdate + '\\n';
-    var signed_headers = 'host;x-amz-content-sha256;x-amz-date';
+    let signhost=window.location.hostname;
 
-    var canonical_request = 'GET\\n/' + service + '\\n' + encodeURI(reqinfo.request_parameters) + '\\n' + canonical_headers + '\\n' + signed_headers + '\\n' + payload_hash;
+    if (location.port != "80" && location.port != 443 )
+    {
+      signhost+=":"+location.port;
+    }
 
-    var canonicalrequestsignature = new CryptoSHA256.SHA256(canonical_request).toString(CryptoSHA256.enc.Hex);
+    let canonical_headers = 'host:' + signhost + '\\nx-amz-content-sha256:' + reqinfo.contentsha256 + '\\nx-amz-date:' + reqinfo.amzdate + '\\n';
+    let signed_headers = 'host;x-amz-content-sha256;x-amz-date';
 
-    var credential_scope = reqinfo.datestamp + '/' + region + '/' + service + '/' + 'aws4_request';
-    var string_to_sign = 'AWS4-HMAC-SHA256\\n' + reqinfo.amzdate + '\\n' + credential_scope + '\\n' + canonicalrequestsignature;
+    /* let canonical_request = 'GET\\n/' + service + '\\n' + encodeURI(reqinfo.request_parameters) + '\\n' + canonical_headers + '\\n' + signed_headers + '\\n' + reqinfo.contentsha256; */
+    let canonical_request = 'GET\\n/' + service + '\\n' + reqinfo.request_parameters + '\\n' + canonical_headers + '\\n' + signed_headers + '\\n' + reqinfo.contentsha256;
 
-    var signature = new CryptoHmac.HmacSHA256(string_to_sign, signing_key);
+    let canonicalrequestsignature = new CryptoSHA256.SHA256(canonical_request).toString(CryptoSHA256.enc.Hex);
 
-    var authorization_header = 'AWS4-HMAC-SHA256 ' + 'Credential=' + login + '/' + credential_scope + ', ' + 'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature;
+    let credential_scope = reqinfo.datestamp + '/' + region + '/' + service + '/' + 'aws4_request';
+    let string_to_sign = 'AWS4-HMAC-SHA256\\n' + reqinfo.amzdate + '\\n' + credential_scope + '\\n' + canonicalrequestsignature;
+
+    let signature = new CryptoHmac.HmacSHA256(string_to_sign, signing_key);
+
+    let authorization_header = 'AWS4-HMAC-SHA256 ' + 'Credential=' + login + '/' + credential_scope + ', ' + 'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature;
 
     if (debug == 1) {
         console.log('Request Parameters: ' + reqinfo.request_parameters);
         console.log('Canonical Request: ' + canonical_request);
         console.log('Aws4 signing secret: ' + password);
-        console.log('content sha256 hash: ' + payload_hash);
+        console.log('content sha256 hash: ' + reqinfo.contentsha256);
         console.log('String to sign: "' + string_to_sign + '"');
         console.log('kDate: "' + reqinfo.amzdate);
         console.log('kRegion: "' + region);
         console.log('kService: "' + service);
-        console.log('kSigningKey: "' + signature);
-        console.log('kSignature: "' + signing_key);
+        console.log('kSigningKey: "' + signing_key);
+        console.log('kSignature: "' + signature);
     }
     return authorization_header;
 }
 
 function resendlastHttpRequest() {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var ResendHttpRequest = new XMLHttpRequest();
     const d = new Date();
     reqinfo.datestamp = d.getFullYear() + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2);
     reqinfo.amzdate = reqinfo.datestamp + 'T' + ("0" + d.getHours()).slice(-2) + ("0" + d.getMinutes()).slice(-2) + ("0" + d.getSeconds()).slice(-2) + 'Z';
-    reqinfo.mgmttoken = LastHttpRequest.mgmttoken;
+    reqinfo.mgmttoken = LastHttpRequest.mgmttoken; 
     reqinfo.action = LastHttpRequest.action;
-    reqinfo.request_parameters = 'Action=' + reqinfo.action + LastHttpRequest.reqparms;
+    reqinfo.request_parameters = 'Action=' + reqinfo.action + encodeURI(LastHttpRequest.reqparms);
     reqinfo.url = window.location.href + 'api';
     reqinfo.authorization_header = createrequesttoken(reqinfo);
 
@@ -3193,6 +3445,7 @@ function resendlastHttpRequest() {
 
     ResendHttpRequest.open("GET", reqinfo.request_url);
     ResendHttpRequest.setRequestHeader('x-amz-date', reqinfo.amzdate);
+    ResendHttpRequest.setRequestHeader('x-amz-content-sha256', reqinfo.contentsha256);
     ResendHttpRequest.setRequestHeader('Authorization', reqinfo.authorization_header);
     ResendHttpRequest.setRequestHeader('content-type', 'application/x-www-form-urlencoded; charset=utf-8');
     ResendHttpRequest.onreadystatechange = RequestComplete;
@@ -3206,7 +3459,7 @@ function createHttpRequest(reqinfo, action, reqparms, mgmttoken, HttpRequest, no
     reqinfo.amzdate = reqinfo.datestamp + 'T' + ("0" + d.getHours()).slice(-2) + ("0" + d.getMinutes()).slice(-2) + ("0" + d.getSeconds()).slice(-2) + 'Z';
     reqinfo.mgmttoken = mgmttoken;
     reqinfo.action = action;
-    reqinfo.request_parameters = 'Action=' + reqinfo.action + reqparms;
+    reqinfo.request_parameters = 'Action=' + reqinfo.action + encodeURI(reqparms);
     reqinfo.url = window.location.href + 'api';
     reqinfo.authorization_header = createrequesttoken(reqinfo);
 
@@ -3216,6 +3469,7 @@ function createHttpRequest(reqinfo, action, reqparms, mgmttoken, HttpRequest, no
 
     HttpRequest.open("GET", reqinfo.request_url);
     HttpRequest.setRequestHeader('x-amz-date', reqinfo.amzdate);
+    HttpRequest.setRequestHeader('x-amz-content-sha256', reqinfo.contentsha256);
     HttpRequest.setRequestHeader('Authorization', reqinfo.authorization_header);
     HttpRequest.setRequestHeader('content-type', 'application/x-www-form-urlencoded; charset=utf-8');
     HttpRequest.onreadystatechange = RequestComplete;
@@ -3244,7 +3498,7 @@ function saveiscsitargets() {
     var targetcomma = '';
     var bindingcomma = '';
 
-    for (target = 0; target < iscsitargets.length; target++) {
+    for (let target = 0; target < iscsitargets.length; target++) {
         let thetarget = iscsitargets[target];
         let iscsitargetid = thetarget.getAttribute('iscsitargetid');
         let headerdigest = document.getElementById('iscsitargetheaderdigest' + iscsitargetid).checked;
@@ -3273,7 +3527,7 @@ function saveiscsitargets() {
         var iscsiluns = document.getElementsByClassName("iscsitarget" + iscsitargetid + "lun");
         var luncomma = '';
 
-        for (lun = 0; lun < iscsiluns.length; lun++) {
+        for (let lun = 0; lun < iscsiluns.length; lun++) {
             let thelun = iscsiluns[lun];
             let iscsilunid = thelun.getAttribute('iscsilunid');
 
@@ -3288,9 +3542,9 @@ function saveiscsitargets() {
         bindingcomma = ',';
         var bindtocomma = '';
 
-        interfaceselect = document.getElementById('iscsitargetinterfaces' + iscsitargetid);
+        let interfaceselect = document.getElementById('iscsitargetinterfaces' + iscsitargetid);
 
-        for (interface = 0; interface < interfaceselect.options.length; interface++) {
+        for (let interface = 0; interface < interfaceselect.options.length; interface++) {
             if (interfaceselect.options[interface].selected) {
                 if (interfaceselect.options[interface].getAttribute("bound") == "0") {
                     iscsibindingsjson += bindtocomma + '{ "address": "' + interfaceselect.options[interface].value + '", "mode": "add" }';
@@ -3306,10 +3560,10 @@ function saveiscsitargets() {
 
         var accountcomma = '';
 
-        accounttargetselect = document.getElementById('iscsitargetaccounts' + iscsitargetid);
-        accountinboundselect = document.getElementById('iscsiinboundaccounts' + iscsitargetid);
+        let accounttargetselect = document.getElementById('iscsitargetaccounts' + iscsitargetid);
+        let accountinboundselect = document.getElementById('iscsiinboundaccounts' + iscsitargetid);
 
-        for (account = 0; account < accounttargetselect.options.length; account++) {
+        for (let account = 0; account < accounttargetselect.options.length; account++) {
             if (accounttargetselect.options[account].selected) {
                 if (accounttargetselect.options[account].getAttribute("bound") == "0" && accounttargetselect.options[account].value != 'n0n3xfs0utb0undacc0unt') {
                     iscsibindingsjson += accountcomma + '{ "username": "' + accounttargetselect.options[account].value + '", "mode": "addtarget" }';
@@ -3359,7 +3613,7 @@ function saveiscsiaccounts() {
     var iscsiaccounts = document.getElementById('iscsiaccountsdiv').getElementsByClassName("iscsiaccountcontent");
     let comma = '';
 
-    for (i = 0; i < iscsiaccounts.length; i++) {
+    for (let i = 0; i < iscsiaccounts.length; i++) {
         let therow = iscsiaccounts[i].getAttribute('iscsiaccountid');
 
         if (document.getElementById('iscsiaccountdelete' + therow).checked && document.getElementById('iscsiaccountusername' + therow).value.length == 0) {
@@ -3409,7 +3663,7 @@ function saveiscsiinterfaces() {
     var iscsiinterfaces = document.getElementById('iscsiinterfacesdiv').getElementsByClassName("iscsiinterfacecontent");
     let comma = '';
 
-    for (i = 0; i < iscsiinterfaces.length; i++) {
+    for (let i = 0; i < iscsiinterfaces.length; i++) {
         let therow = iscsiinterfaces[i].getAttribute('iscsiinterfaceid');
 
         if (document.getElementById('iscsiinterfacedelete' + therow).checked && document.getElementById('iscsiinterfaceaddress' + therow).value.length == 0) {
@@ -3422,9 +3676,9 @@ function saveiscsiinterfaces() {
             '"mode":    "';
 
         if (document.getElementById('iscsiinterfacedelete' + therow).checked) {
-            iscsiinterfacejson += 'delete"'
+            iscsiinterfacejson += 'delete"';
         } else {
-            iscsiinterfacejson += 'add"'
+            iscsiinterfacejson += 'add"';
         }
         iscsiinterfacejson += '}}';
         comma = ',';
@@ -3448,7 +3702,7 @@ function savenfsexports() {
     var nfsexports = document.getElementById('nfsexportsdiv').getElementsByClassName("nfsexportcontent");
     let comma = '';
 
-    for (i = 0; i < nfsexports.length; i++) {
+    for (let i = 0; i < nfsexports.length; i++) {
         let nfsexportid = nfsexports[i].getAttribute('exportid');
         nfsexportsjson += comma + '{ "exportdir": "' + document.getElementById('nfsexportfolder' + nfsexportid).value + '",';
 
@@ -3653,7 +3907,7 @@ function updirlisting(basedir) {
     dirlisting(basedir);
 }
 
-function dirlisting(basedir, mode) {
+function dirlisting(basedir) {
 
     if (basedir.length == 0) {
         basedir = "/";
@@ -3678,78 +3932,76 @@ function dirlisting(basedir, mode) {
     getdirectorylisting(basedir, document.getElementById('fileselectmode').value);
 }
 
-LastHttpRequest = new Object;
-LastHttpRequest.active = 0;
 
 
 function getdirectorylisting(basedir, mode) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&ListDir=' + basedir + '&Mode=' + mode;
     if (createHttpRequest(reqinfo, 'GetDirectoryListing', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function getsystemstatus(e) {
-    const reqinfo = new Object();
+function getsystemstatus() {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     if (createHttpRequest(reqinfo, 'GetSystemStatus', '', 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function geterrorlogs(e) {
-    const reqinfo = new Object();
+function geterrorlogs() {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     if (createHttpRequest(reqinfo, 'GetErrorLog', '', 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
 function getconfig(whichconfig) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     if (createHttpRequest(reqinfo, whichconfig, '', 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function getlicensedetails(e) {
-    const reqinfo = new Object();
+function getlicensedetails() {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     if (createHttpRequest(reqinfo, 'GetLicenseDetails', '', 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function sendattachuserrole(UserId, role) {
-    const reqinfo = new Object();
+function sendattachuserrole(UserId, role, roletype) {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RoleName=' + role + '&UserId=' + UserId;
+    var reqparms = '&RoleName=' + role + '&RoleType=' + roletype + '&UserId=' + UserId;
     if (createHttpRequest(reqinfo, 'AttachUserRole', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function senddetachuserrole(UserId, role) {
-    const reqinfo = new Object();
+function senddetachuserrole(UserId, role, roletype) {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RoleName=' + role + '&UserId=' + UserId;
+    var reqparms = '&RoleName=' + role + '&RoleType=' + roletype + '&UserId=' + UserId;
     if (createHttpRequest(reqinfo, 'DetachUserRole', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
 function senddeleteuserrequest(UserId) {
-    const reqinfo = new Object();
+    const reqinfo = {}; 
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&UserId=' + UserId;
     if (createHttpRequest(reqinfo, 'DeleteUser', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserEmail, UserDescription1, UserDescription2, UserAuthMethod) {
-    const reqinfo = new Object();
+function sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserContentSecret, UserEmail, UserDescription1, UserDescription2, UserAuthMethod, UID, GID) {
+    const reqinfo = {};
     let action = 'UpdateUser';
 
     var HttpRequest = new XMLHttpRequest();
     var reqparms = "";
 
-    if (UserAuthMethod = null) {
+    if (UserAuthMethod != null) {
         reqparms += '&AuthMethod=' + UserAuthMethod;
     }
 
@@ -3774,12 +4026,24 @@ function sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserEm
         reqparms += '&Email=' + UserEmail;
     }
 
+    if (UserContentSecret != null) {
+        reqparms += '&NewContentSecret=' + UserContentSecret;
+    }
+
     if (UserSecretHash != null) {
         reqparms += '&NewSecretHash=' + UserSecretHash;
     }
 
     if (UserId != null) {
         reqparms += '&NewUserId=' + UserId;
+    }
+
+    if (GID != null) {
+        reqparms += '&POSIXGID=' + GID;
+    }
+
+    if (UID != null) {
+        reqparms += '&POSIXUID=' + UID;
     }
 
     reqparms += '&UserId=' + OrgUserId;
@@ -3793,8 +4057,8 @@ function sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserEm
 }
 
 
-function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserEmail, UserDescription1, UserDescription2, UserAuthMethod, Roles) {
-    const reqinfo = new Object();
+function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserContentSecret, UserEmail, UserDescription1, UserDescription2, UserAuthMethod, Roles, UID, GID) {
+    const reqinfo = {};
     let action = 'CreateUser';
 
     var HttpRequest = new XMLHttpRequest();
@@ -3804,7 +4068,7 @@ function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserEmail, User
         reqparms += '&AssumeRolePolicyDocument=' + Roles;
     }
 
-    if (UserAuthMethod = null) {
+    if (UserAuthMethod != null) {
         reqparms += '&AuthMethod=' + UserAuthMethod;
     }
 
@@ -3816,8 +4080,21 @@ function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserEmail, User
         reqparms += '&Email=' + UserEmail;
     }
 
+    if (UserContentSecret != null) {
+        reqparms += '&NewContentSecret=' + UserContentSecret;
+    }
+
     if (UserSecretHash != null) {
         reqparms += '&NewSecretHash=' + UserSecretHash;
+    }
+
+    if (GID != null) {
+        reqparms += '&POSIXGID=' + GID;
+    }
+
+
+    if (UID != null) {
+        reqparms += '&POSIXUID=' + UID;
     }
 
     reqparms += '&UserId=' + UserId + '&UserName=' + UserName;
@@ -3826,8 +4103,8 @@ function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserEmail, User
     HttpRequest.send();
 }
 
-function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabled) {
-    const reqinfo = new Object();
+function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabled, roletype) {
+    const reqinfo = {};
     let action = 'SaveRole';
 
     if (Create) {
@@ -3839,7 +4116,16 @@ function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabl
     if (RoleId != null) {
         reqparms += '&RoleId=' + RoleId;
     }
-    reqparms += '&RoleName=' + RoleName + '&Version=' + Version;
+    reqparms += '&RoleName=' + RoleName + '&RoleType=';
+
+    if ( roletype == 'iammgmt' ) {
+        reqparms+='iam';
+    }
+    else { 
+        reqparms+='user';
+    }
+
+    reqparms +='&Version=' + Version;
 
 
     if (createHttpRequest(reqinfo, action, reqparms, 0, HttpRequest) == null) return;
@@ -3847,7 +4133,7 @@ function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabl
 }
 
 function getuser(userid) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&UserId=' + userid;
     if (createHttpRequest(reqinfo, 'GetUser', reqparms, 0, HttpRequest) == null) return;
@@ -3855,40 +4141,49 @@ function getuser(userid) {
 }
 
 function sendgetconfsreq(reqjson, mode) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&Mode=' + mode + '&RequestJSON=' + reqjson;
     if (createHttpRequest(reqinfo, 'GetConfigs', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
-function senddeleterole(rolename, version) {
-    const reqinfo = new Object();
+function senddeleterole(roletype, rolename, version) {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RoleName=' + rolename + '&Version=' + version;
+    var reqparms = '&RoleName=' + rolename; 
+
+    if ( roletype == 'iammgmt' ) {
+      reqparms+= '&RoleType=iam';
+    }
+    else { 
+        reqparms+='user';
+    }
+
+    reqparms+= '&Version=' + version;
     if (createHttpRequest(reqinfo, 'DeleteRole', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
 function sendupdatesecretrequest(oldhash, newhash) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&NewSecretHash=' + newhash + '&OldSecretHash=' + oldhash;
     if (createHttpRequest(reqinfo, 'ChangePassword', reqparms, 0, HttpRequest, true) == null) return;
     HttpRequest.send();
 }
 
-function getsessionpermissions(e) {
-    const reqinfo = new Object();
+function getsessionpermissions() {
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListRoles", "iam:DeleteManagementRoles", "iam:ListManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateUsers", "iam:UpdateOwnSecret"]}';
+    var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListManagementRoles", "iam:DeleteManagementRoles", "nexfs:GetContentRoles","nexfs:ListContentRoles", "nexfs:UpdateContentRoles", "nexfs:DeleteManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateOtherUserContentSecret","iam:UpdateUsers", "iam:UpdateOwnSecret"]}';
     var reqparms = '&RequestJSON=' + reqjson;
     if (createHttpRequest(reqinfo, 'GetSessionPermissions', reqparms, 0, HttpRequest, true) == null) return;
     HttpRequest.send();
 }
 
-function getsessiontoken(e) {
-    const reqinfo = new Object();
+function getsessiontoken() {
+    const reqinfo = {};
     var tokenRequest = new XMLHttpRequest();
     if (createHttpRequest(reqinfo, 'GetSessionToken', '', 1, tokenRequest, true) == null) return;
     tokenRequest.onreadystatechange = tokenRequestListener;
@@ -3898,7 +4193,7 @@ function getsessiontoken(e) {
 }
 
 function dologout() {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&SessionToken=' + document.getElementById('ts').value;
     if (createHttpRequest(reqinfo, 'RevokeSessionToken', reqparms, 0, HttpRequest) == null) return;
@@ -3906,12 +4201,12 @@ function dologout() {
     HttpRequest.send();
 }
 
-function uploadlicensekey(e) {
+function uploadlicensekey() {
     UpdateConfig('NEXFSLICENSEKEY', document.getElementById('newlicensekey').value, 3, 'updatelicensediv');
 }
 
 function SendJSONrequest(json, requestaction) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&RequestJSON=' + json;
     if (createHttpRequest(reqinfo, requestaction, reqparms, 0, HttpRequest) == null) return;
@@ -3919,7 +4214,7 @@ function SendJSONrequest(json, requestaction) {
 }
 
 function UpdateConfigs(json, confformtoreload) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&RequestJSON=' + json;
     if (createHttpRequest(reqinfo, 'UpdateConfigs', reqparms, 0, HttpRequest) == null) return;
@@ -3928,7 +4223,7 @@ function UpdateConfigs(json, confformtoreload) {
 }
 
 function UpdateConfig(varname, newvalue, mode, hidediv) {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&ConfigurationNewValue=' + newvalue + '&ConfigurationVarName=' + varname + '&UpdateMode=' + mode;
     if (createHttpRequest(reqinfo, 'UpdateConfig', reqparms, 0, HttpRequest) == null) return;
@@ -3942,7 +4237,7 @@ function UpdateConfig(varname, newvalue, mode, hidediv) {
 }
 
 function showupdatelicensediv() {
-    const reqinfo = new Object();
+    const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqparms = '&ConfigurationVarName=NEXFSLICENSEKEY&Mode=1';
     if (createHttpRequest(reqinfo, 'GetConfig', reqparms, 0, HttpRequest) == null) return;

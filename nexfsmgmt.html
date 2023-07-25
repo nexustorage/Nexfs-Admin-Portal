@@ -13,7 +13,17 @@
     <script src="crypto-min.js"></script>
 </head>
 
-<body>
+<script>
+    function shownexfsid() {
+      var req = new XMLHttpRequest();
+      req.open('HEAD', '/nexfsconsole', false);
+      req.send(null);
+
+      document.getElementById("headernexfsid").innerHTML = "Nexfs ID: " + req.getResponseHeader("nexfs-id") + "&nbsp;&nbsp; Region: " + req.getResponseHeader("nexfs-region");
+    }
+</script>
+
+<body onload="shownexfsid()">
     <main>
         <div id="header" class="header">
             <div id="nexfsicon" class="headernexfsicon">
@@ -44,7 +54,12 @@
                 Nexustorage Nexfs Admin Console
             </div>
             <div id="headerreleaselabel" class="headerreleasetext">
-                Portal Release 0.99
+                Portal Release 1.01(23)
+            </div>
+            <div id="headernexfsinfolabel" class="headernexfstext">
+                <table>
+                    <tr><td id="headernexfsid"></td></tr>
+                </table>
             </div>
         </div>
 
@@ -91,15 +106,15 @@
                     <table>
                         <tr>
                             <td>Login Name:</td>
-                            <td><input type="text" size="30px" name="username" id="username"></td>
+                            <td><input type="text" size="30px" name="username" id="username" tabindex="1" ></td>
                         </tr>
                         <tr>
                             <td>Password:</td>
-                            <td><input type="password" size="30px" name="password" id="password"></td>
+                            <td><input type="password" size="30px" name="password" id="password"  tabindex="2"></td>
                         </tr>
                         <tr>
                             <td colspan="2">
-                                <center><input type="submit" value="Login" id="loginbutton" onclick="getsessiontoken(this); return false;"></center>
+                                <center><input type="submit" value="Login" id="loginbutton" onclick="getsessiontoken(this); return false;" tabindex="3"></center>
                             </td>
                         </tr>
                         <tr>
@@ -165,7 +180,7 @@
         <div id="configurationhelpdiv" class="configurationhelp hidden" onmouseout="hidediv('configurationhelpdiv')">
             <table>
                 <tr>
-                    <td colspan="2" id="configurationhelplabel" style="font-weight: bold;"></td>
+                    <td colspan="2" id="configurationhelplabel" style="font-weight: bold; font-size: 18px; text-align: center; color: #154360;"></td>
                 </tr>
                 <tr>
                     <td colspan="2" style="line-height:10px;">&nbsp;</td>
@@ -726,17 +741,17 @@
                     <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETEENDWINDOW',this)">Deletions
               Window End Time</label><input type="time" validate="true" class="configinput" id="DELETEENDWINDOW" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
                     <br>
-                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETERETAINDAYS',this)">Days to Retain
-              Deleted Files </label><input type="number" validate="true" class="configinput" id="DELETERETAINDAYS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'VERSIONRETAINDAYS',this)">Days to Retain
+              Deleted Files </label><input type="number" validate="true" class="configinput" id="VERSIONRETAINDAYS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
                     <br>
                     <br>
-                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'TRUNCTATE0ASDELETE',this)">Truncations as Deletions</label>
-                        <label class="switch"><input type="checkbox" class="configinput" id="TRUNCTATE0ASDELETE"
+                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'TRUNCTATE0CREATEVERSION',this)">Truncations as Deletions</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="TRUNCTATE0CREATEVERSION"
                 oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')"><span
                 class="slider round" style="left: 300px"></span></label>
                     </div>
-                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'DELETEMOVETOTIER3',this)">Move Deletes to Tier-3</label>
-                        <label class="switch"><input type="checkbox" class="configinput" id="DELETEMOVETOTIER3"
+                    <div id="movetotier3"><label class="switchlabel" onclick="showconfigurationhelp(event, 'TRUNCTATEMOVETOTIER3',this)">Move Deletes to Tier-3</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="TRUNCTATEMOVETOTIER3"
                 oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')"><span
                 class="slider round" style="left: 300px"></span></label>
                     </div>
@@ -912,8 +927,23 @@
                 <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('securityconfigurationdiv');">
                     <center>Refresh</center>
                 </div>
-                &nbsp;<br><br>
-                <div class="paneltitle">Nexfscli Access Settings</div>
+                &nbsp;
+                <br><br>
+                <div class="paneltitle">Content Server / S3 API Defaults</div>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DEFAULTPOSIXUID',this)">
+                    Default POSIX UID</label><input type="number" validate="true" class="configinput" id="DEFAULTPOSIXUID" oninput="validateconfigform('securityconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DEFAULTPOSIXGID',this)">
+                    Default POSIX GID</label><input type="number" validate="true" class="configinput" id="DEFAULTPOSIXGID" oninput="validateconfigform('securityconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DEFAULTALLUSERSPOSIXGROUP',this)">Default All User POSIX Group</label>
+                    <input type="text" class="configinput" id="DEFAULTALLUSERSPOSIXGROUP" oninput="validateconfigform('securityconfigurationdiv')" required>
+                </div>
+                <br><br>
+                <div class="panellabel">Nexfscli Access Settings</div>
+                <br><br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'SECURITYCMDGROUP',this)">
             Command Access Group</label><input type="number" validate="true" class="configinput" id="SECURITYCMDGROUP" oninput="validateconfigform('securityconfigurationdiv')" required>
                 </div>
@@ -1108,6 +1138,14 @@
                 </div>
                 &nbsp;<br><br>
                 <div class="paneltitle">Advanced Settings</div>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSID',this)">
+                    Nexfs Server ID</label><input type="number" validate="true" class="configinput" id="NEXFSID" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'NEXFSREGION',this)">Nexfs Cluster Region
+                  </label><input type="text" validate="true" class="configinput inputdirectory" id="NEXFSREGION" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br> 
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MOUNTPOINT',this)">Nexfs Fuse Mountpoint
           </label><input type="text" validate="true" class="configinput inputdirectory" id="MOUNTPOINT" oninput="validateconfigform('advancedconfigurationdiv')" pattern="^/.+" required>
                 </div>
@@ -1234,8 +1272,16 @@
                     </table>
                 </div>
                 <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERINTERFACE',this)">API / MgmtWeb Server Interface 
+                      </label><input type="text" validate="true" class="configinput inputwide" id="MGMTWEBSERVERINTERFACE" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERPORT',this)">API / MgmtWeb Server Port 
                       </label><input type="number" validate="true" class="configinput" id="MGMTWEBSERVERPORT" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERMAXCONNECTIONS',this)">API / MgmtWeb Server Max Connections 
+                      </label><input type="number" validate="true" class="configinput" id="MGMTWEBSERVERMAXCONNECTIONS" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
 
                 <br>
@@ -1277,24 +1323,69 @@
                 <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBTOKENEXPIRY',this)">Mgmt Token Default Idle Timeout
                     </label><input type="number" validate="true" class="configinput" id="MGMTWEBTOKENEXPIRY" oninput="validateconfigform('advancedconfigurationdiv')" required>
-                    <br>
-                    <br>
-                    <br>
+                </div>
+
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERENABLED',this)">Content Server</label>
                     <table>
                         <tr>
-                            <td>
-                                <div id="updateadvancedconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('advancedconfigurationdiv');">
-                                    <center>Update</center>
-                                </div>
-                            </td>
-                            <td>
-                                <div id="revertadvancedconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('advancedconfigurationdiv');">
-                                    <center>Revert</center>
-                                </div>
+                            <td class="configinput" id="CONTENTWEBSERVERENABLED">
+                                <input class="firstradio" type="radio" name="CONTENTWEBSERVERENABLED" id="CONTENTWEBSERVERENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="CONTENTWEBSERVERENABLED" id="CONTENTWEBSERVERENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
                             </td>
                         </tr>
                     </table>
                 </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERINTERFACE',this)">Content Server Interface 
+                      </label><input type="text" validate="true" class="configinput inputwide" id="CONTENTWEBSERVERINTERFACE" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERPORT',this)">Content Server Port 
+                      </label><input type="number" validate="true" class="configinput" id="CONTENTWEBSERVERPORT" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERMAXCONNECTIONS',this)">Content Server Max Connections 
+                      </label><input type="number" validate="true" class="configinput" id="CONTENTWEBSERVERMAXCONNECTIONS" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'S3UPLOADPREFIXDIR',this)">Content Server upload staging directory 
+                      </label><input type="text" validate="true" class="configinput inputwide" id="S3UPLOADPREFIXDIR" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'S3USESHA256ETAG',this)">S3 Return SHA256 etag</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="S3USESHA256ETAG">
+                                <input class="firstradio" type="radio" name="S3USESHA256ETAG" id="S3USESHA256ETAG0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="S3USESHA256ETAG" id="S3USESHA256ETAG1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'WSCONNECTIONIDLETIMEOUTSECONDS',this)">Content Server idle request timeout 
+                      </label><input type="number" validate="true" class="configinput" id="WSCONNECTIONIDLETIMEOUTSECONDS" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <br>
+                <br>
+                <table>
+                    <tr>
+                        <td>
+                            <div id="updateadvancedconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('advancedconfigurationdiv');">
+                                <center>Update</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="revertadvancedconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('advancedconfigurationdiv');">
+                                <center>Revert</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
 
@@ -1326,12 +1417,29 @@
                 </table>
             </div>
         </div>
-        <div id="showhelp" class="hidden" NFSClients="<b>Clients:</b><br><br>The NFS client who can access the export.<br>Can be a single host, netgroup, or IP networks, wildcards for client names are supported. Exports man page 5 documents valid formats as:<br><br>Single Host<br>&emsp;You may specify a host either by an abbreviated name recognized be the resolver, the fully qualified domain name, an IPv4 address, or an IPv6 address. IPv6 addresses must not be inside square brackets in /etc/exports lest they be confused with character-class wildcard matches.<br><br>Netgroups<br>&emsp;NIS netgroups may be given as @group. Only the host part of each netgroup members is consider in checking for membership. Empty host parts or those containing a single dash (-) are ignored.<br><br> Wildcards<br>&emsp;Machine names may contain the wildcard characters * and ?, or may contain character class lists within [square brackets]. This can be used to make the exports file more compact; for instance, *.cs.foo.edu matches all hosts in the domain cs.foo.edu. As these characters also match the dots in a domain name, the given pattern will also match all hosts within any subdomain of cs.foo.edu.<br><br>IP networks<br>&emsp;You can also export directories to all hosts on an IP (sub-) network simultaneously. This is done by specifying an IP address and netmask pair as address/netmask where the netmask can be specified in dotted-decimal format, or as a contiguous mask length. For example, either '/255.255.252.0' or '/22' appended to the network base IPv4 address results in identical subnetworks with 10 bits of host. IPv6 addresses must use a contiguous mask length and must not be inside square brackets to avoid confusion with character-class wildcards. Wildcard characters generally do not work on IP addresses, though they may work by accident when reverse DNS lookups fail."
+        <div id="showhelp" class="hidden" 
+            NFSClients="<b>Clients:</b><br><br>The NFS client who can access the export.<br>Can be a single host, netgroup, or IP networks, wildcards for client names are supported. Exports man page 5 documents valid formats as:<br><br>Single Host<br>&emsp;You may specify a host either by an abbreviated name recognized be the resolver, the fully qualified domain name, an IPv4 address, or an IPv6 address. IPv6 addresses must not be inside square brackets in /etc/exports lest they be confused with character-class wildcard matches.<br><br>Netgroups<br>&emsp;NIS netgroups may be given as @group. Only the host part of each netgroup members is consider in checking for membership. Empty host parts or those containing a single dash (-) are ignored.<br><br> Wildcards<br>&emsp;Machine names may contain the wildcard characters * and ?, or may contain character class lists within [square brackets]. This can be used to make the exports file more compact; for instance, *.cs.foo.edu matches all hosts in the domain cs.foo.edu. As these characters also match the dots in a domain name, the given pattern will also match all hosts within any subdomain of cs.foo.edu.<br><br>IP networks<br>&emsp;You can also export directories to all hosts on an IP (sub-) network simultaneously. This is done by specifying an IP address and netmask pair as address/netmask where the netmask can be specified in dotted-decimal format, or as a contiguous mask length. For example, either '/255.255.252.0' or '/22' appended to the network base IPv4 address results in identical subnetworks with 10 bits of host. IPv6 addresses must use a contiguous mask length and must not be inside square brackets to avoid confusion with character-class wildcards. Wildcard characters generally do not work on IP addresses, though they may work by accident when reverse DNS lookups fail."
             NFSAccess="<b>Access:</b><br><br>If the export should be exported Read-Write or Read-Only" NFSMappings="<b>Mappings:</b><br><br><b>AnonymousUID</b><br><br>Explicitly set the uid of the anonymous account<br><br><b>AnonymousGID</b><br><br>Explicitly set the gid of the anonymous account<br><br><b>SquashMode</b><br><br><i>root_squash</i><br><br>Map requests from uid/gid 0 to the anonymous uid/gid. Note that this does not apply to any other uids or gids that might be equally sensitive, such as user bin or group staff<br><br><i>no_root_squash</i><br><br>Turn off root squashing<br><br><i>all_squash</i><br><br>Map all uids and gids to the anonymous user. Useful for NFS-exported public FTP directories, news spool directories, etc"
             NFSSecurity="<b>Security:</b><br><br>sys (Default)<br>&emsp;Basic Linux host system security (no cryptographic security)<br><br>krb5<br>&emsp;The export supports krb5 security  (authentication only)<br><br>krb5i<br>&emsp;The export supports krb5i security  (integrity protection)<br><br>krb5p<br>&emsp;The export supports krb5p security  (privacy protection)"
             NFSAdvanced="<b>Advanced:</b><br><br>Subtree Check<br>&emsp;Enables or disables subtree checking. The system must check a subdirectory of the filesystem exported, but when the whole filesystem is not export for each NFS request, the server must check not only that the accessed file is in the appropriate filesystem (which is easy) but also that it is in the exported tree (which is harder)<br><br>Secure Locks<br>&emsp;When not set the NFS server is not required to enforce authentication of locking requests. Normally the NFS server will require a lock request to hold a credential for a user who has read access to the file. Without this set those access checks will not be performed.<br><br>No wdelay<br>&emsp;When enabled performance can improve by allowing the NFS server to send multiple related write requests to Nexfs in a single operation, but performance can also be reduced if the NFS server receives small unrelated write requests.  Note: async must also be disabled on the export for this feature to activate<br><br>Async<br>&emsp;This option allows the NFS server to reply to requests before change have been committed to storage. Using this option may improve performance, but can cause data to be lost or corrupted if the server is uncleanly restarted or crashed<br><br>Export Enabled<br>&emsp;Make the export available for clients to mount"
             iSCSIInterfaces="<b>Interfaces:</b><br><br>The IP Address (or resolvable dns name) of a system network interface that the iSCSI subsystem can attach to (interfaces configured here must be attached to iscsi targets)" iSCSIPort="<b>Port:</b><br><br>The network port number to listen on, default: 3260"
-            iSCSIDelete="<b>Delete:</b><br><br><br>Select to delete the corresponding entry">
+            iSCSIDelete="<b>Delete:</b><br><br><br>Select to delete the corresponding entry"
+            IamRoleID="<b>Role ID:</b><br><br>Each role has a unique ID. The ID is assigned automatically for each role  when created in the admin console"
+            IamRoleEnabled="<b>Role Enabled:</b><br><br>A role is active when enabled, and inactive when disabled"
+            IamRoleVersion="<b>Role Version:</b><br><br>A version can be assigned to a role. The admin console will set a default version when a role is first created, then increment that version if the role statement is modified. A user may enter and manually manage their preferred version format"
+            IamRoleAllowed="<b>Allowed Actions:</b><br><br>A selection of one or more roles that can be performed by any administrator or user assigned to the role"
+            EDITUSERUSERID="<b>User ID:</b><br><br>The Accounts login ID, the User ID, is also used by the user as the Access Key ID when accessing Nexfs over the S3 protocol"
+            EDITUSERACCOUNTENABLED="<b>Account Enabled:</b><br><br>If an account is disabled, then it cannot be used for authentication against the Nexfs Management Console, Management API or S3 Protocol"
+            EDITUSERNAME="<b>Account Enabled:</b><br><br>The name of the user or application to whom the account is assigned"
+            EDITUSERSECRET="<b>Account Secret:</b><br><br>Optinal: The Account password to access the management console and management API"
+            EDITUSERCONTENTSECRET="<b>Content Access Secret:</b><br><br>Optional: The users passphase used to access Nexfs using the S3 protocol (the S3Secret Access Key)"
+            EDITUSERPOSIXUIDGID="<b>POSIX UID/GID:</b><br><br>Optional. The POSIX User ID (UID) and Primary Group ID (GIU) to use with the account. Used when creating and accessing files as objects over the S3 protocol. Allows files to be accessed over file protocols with the same ownership as when accessed as an object. Values must exist a valid user and group on the server Nexfs runs on. Defaults to Nexfs advanced configuration values DEFAULTPOSIXUID and DEFAULTPOSIXGID"
+            EDITUSEREMAIL="<b>Email:</b><br><br>Can optionally be used to record a users email address"
+            EDITUSERACCOUNTDESCRIPTION="<b>Account Description:</b><br><br>Can optionally be used to record a account description"
+            EDITUSERAUTHENICATIONMETHOD="<b>Authenication Method:</b><br><br>The method to be used when authenication requests from the account"
+            EDITUSERCONTENTROLES="<b>Content Roles:</b><br><br>Default Roles to be assigned when the account is used with the S3 Protocol, bucket and object level policies when configured, override default content roles"
+            EDITUSERMANAGEMENTROLES="<b>Management Roles:</b><br><br>The roles the account assumes when used to access the webconsole and management API"
+            >
         </div>
 
         <div id="showhelpdiv" class="showhelp hidden">
@@ -1491,46 +1599,61 @@
 
         <div id="iamedituserdiv" class="iamedituser hidden">
             <div class="iamedituserheading">Nexfs User Management</div>
-            <div class="iamedituserid iamedituserheading">User ID</div>
+            <div class="iamedituserid iamedituserheading"  onclick="openshowhelp('EDITUSERUSERID')">User ID</div>
             <div class="iamedituserid iamedituserinput">
                 <input type="text" size="32" id="iamedituserid" autocomplete="off" maxlength="63" required onchange="iameditvalidate('iamedituserid')">
             </div>
-            <div class="iamedituserenabled iamedituserheading">Account Enabled</div>
+            <div class="iamedituserenabled iamedituserheading" onclick="openshowhelp('EDITUSERACCOUNTENABLED')">Account Enabled</div>
             <div class="iamedituserenabled iamedituserinput">
                 <input type="checkbox" id="iamedituserenabled" onchange="iameditvalidate('iamedituserenabled')">
             </div>
-            <div class="iameditusername iamedituserheading">Name</div>
+            <div class="iameditusername iamedituserheading" onclick="openshowhelp('EDITUSERNAME')">Name</div>
             <div class="iameditusername iamedituserinput">
                 <input type="text" size="63" id="iameditusername" autocomplete="off" minlength="1" required onchange="iameditvalidate('iameditusername')">
             </div>
-            <div class="iameditusersecret iamedituserheading">Secret</div>
+            <div class="iameditusersecret iamedituserheading" onclick="openshowhelp('EDITUSERSECRET')">Management Secret</div>
             <div class="iameditusersecret iamedituserinput">
-                <input type="password" autocomplete="off" size="32" id="iameditusersecret" minlength="8" required onchange="iameditvalidate('iameditusersecret')">
+                <input type="password" autocomplete="off" size="32" id="iameditusersecret" minlength="8" onchange="iameditvalidate('iameditusersecret')">
             </div>
-            <div class="iamedituseremail iamedituserheading">Email</div>
+            <div class="iameditusercontentsecret iamedituserheading" onclick="openshowhelp('EDITUSERCONTENTSECRET')">Content (S3) Secret</div>
+            <div class="iameditusercontentsecret iamedituserinput">
+                <input type="password" autocomplete="off" size="32" id="iameditusercontentsecret" minlength="8" onchange="iameditvalidate('iameditusercontentsecret')">
+            </div>
+            <div class="ianedituserposixids iamedituserheading" onclick="openshowhelp('EDITUSERPOSIXUIDGID')">POSIX UID / GID</div>
+            <div class="ianedituserposixids iamedituserinput">
+                <input type="number" autocomplete="off" size="12" id="iamedituserposixuid" placeholder="default" onchange="iameditvalidate('iamedituserposixuid')">
+                &nbsp;/&nbsp;
+                <input type="number" autocomplete="off" size="12" id="iamedituserposixgid" placeholder="default" onchange="iameditvalidate('iamedituserposixgid')">
+            </div>
+            <div class="iamedituseremail iamedituserheading"  onclick="openshowhelp('EDITUSEREMAIL')">Email</div>
             <div class="iamedituseremail iamedituserinput">
                 <input type="email" size=63 id="iamedituseremail" maxlength="255" onchange="iameditvalidate('iamedituseremail')">
             </div>
-            <div class="iamedituserdescription1 iamedituserheading">Account Descripton</div>
+            <div class="iamedituserdescription1 iamedituserheading"  onclick="openshowhelp('EDITUSERACCOUNTDESCRIPTION')">Account Descripton</div>
             <div class="iamedituserdescription1 iamedituserinput">
                 <input type="text" size=63 id="iamedituserdescription1" maxlenght="255" onchange="iameditvalidate('iamedituserdescription1')">
             </div>
             <div class="iamedituserdescription2 iamedituserinput">
                 <input type="text" size=63 id="iamedituserdescription2" maxlenght="255" onchange="iameditvalidate('iamedituserdescription2')">
             </div>
-            <div class="iamedituserauthenicationmethod iamedituserheading">Authenication Method</div>
+            <div class="iamedituserauthenicationmethod iamedituserheading"  onclick="openshowhelp('EDITUSERAUTHENICATIONMETHOD')">Authenication Method</div>
             <div class="iamedituserauthenicationmethod iamedituserinput">
                 <select id="iamedituserauthmethod" required onchange="iameditvalidate('iamedituserauthmethod')">
                    <option value="0" selected>Nexfs</option>
                 </select>
             </div>
-            <div class="iameditusermgmtroleselect iamedituserheading">Management Roles</div>
+            <div class="iamedituserroleselect iamedituserheading"  onclick="openshowhelp('EDITUSERCONTENTROLES')">User Content Roles</div>
+            <div class="iamedituserroleselect iamedituserinput">
+                <select id="iamedituserroleselect" selectedcount="0" multiple>
+                </select>
+            </div>
+            <div class="iameditusermgmtroleselect iamedituserheading"  onclick="openshowhelp('EDITUSERMANAGEMENTROLES')">Management Roles</div>
             <div class="iameditusermgmtroleselect iamedituserinput">
                 <select id="iameditusermgmtroleselect" selectedcount="0" multiple>
                 </select>
             </div>
             <br>
-            <div style="left: 50px; top: 400px; position: relative;">
+            <div style="left: 50px; top: 520px; position: relative;">
                 <table style="width: 100%;">
                     <tr>
                         <td></td>
@@ -1605,11 +1728,12 @@
             <div class="topmenutab">
                 <button name="iamsecretkey" id="iamsecretkeymenu" class="topmenutablinks active" onclick="changetopmenuselected(event,'iamdiv')">Secret Key</button>
                 <button name="iamaccounts" id="iamaccountsmenu" class="topmenutablinks" onclick="changetopmenuselected(event,'iamdiv')">Accounts</button>
+                <button name="iamcontentroles" id="iamcontentrolesmenu" class="topmenutablinks" onclick="changetopmenuselected(event,'iamdiv')">User Content Roles</button>
                 <button name="iammgmtroles" id="iammgmtrolesmenu" class="topmenutablinks" onclick="changetopmenuselected(event,'iamdiv')">Management Roles</button>
             </div>
             <div id="iamsecretkeyconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
                 &nbsp;<br><br>
-                <div class="paneltitle">Change Secret Key</div>
+                <div class="paneltitle">Change Management Console/API Secret Key</div>
                 <div id="iamsecretkey">
                     <div id="updatesecretediv" class="updatesecretdiv">
                         <div id="secretkeyinfo" class="secretkeyinfo" style="left:50px; top: 70px">
@@ -1685,6 +1809,32 @@
                 <div class="hidden" id="useradminpermissions" GetUser="0">
                 </div>
             </div>
+            <div id="iamcontentrolesconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                &nbsp;<br><br>
+                <div class="paneltitle">Manage Nexfs User Content Roles</div>
+                <div class="iamcontentrolesdiv" id="iamcontentrolesdiv" iamcontentrolecount="0">
+
+                </div>
+                <div style="line-height: 1.5;">
+                    <br><br><br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="iamcontentrolesadd" class="button" style="left:50px;" onclick="iamrolesadd('iamcontent');">
+                                    <center>Add Role</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="iamcontentrolesrevert" class="button" style="left:50px;" onclick="reloadiamcontentroles();">
+                                    <center>Reload Roles</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="hidden" id="iamcontentrolepermissions" ListRoles="0" DeleteRoles="0">
+                </div>
+            </div>
             <div id="iammgmtrolesconfigurationdiv" class="subpaneldiv configurationtabdiv">
                 &nbsp;<br><br>
                 <div class="paneltitle">Manage Nexfs IAM Roles</div>
@@ -1696,7 +1846,7 @@
                     <table>
                         <tr>
                             <td>
-                                <div id="iammgmtrolesadd" class="button" style="left:50px;" onclick="iammgmtrolesadd();">
+                                <div id="iammgmtrolesadd" class="button" style="left:50px;" onclick="iamrolesadd('iammgmt');">
                                     <center>Add Role</center>
                                 </div>
                             </td>
@@ -1708,7 +1858,7 @@
                         </tr>
                     </table>
                 </div>
-                <div class="hidden" id="rolepermissions" ListRoles="0" DeleteRoles="0">
+                <div class="hidden" id="iammgmtrolepermissions" ListRoles="0" DeleteRoles="0">
                 </div>
             </div>
         </div>
@@ -2010,6 +2160,16 @@
                         <tr>
                             <td>Tier-3 Status:</td>
                             <td id="statustier3text">N/A</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="statuscontentserver" class="nexfsstatusitem nexfsstatusdisabled" style="left: 350px; top: 190px">
+                <div class="nexfsstatustext">
+                    <table>
+                        <tr>
+                            <td>Nexfs Content (S3) Server:</td>
+                            <td id="statuscontentserverstatustext">N/A</td>
                         </tr>
                     </table>
                 </div>

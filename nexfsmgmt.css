@@ -180,11 +180,20 @@ input[type="button"] {
 .headerreleasetext {
     position: relative;
     float: right;
-    top: 25%;
+    top: 31%;
     padding-right: 18px;
     color: white;
     font-family: Helvetica;
-    font-size: 22px;
+    font-size: 18px;
+}
+
+.headernexfstext {
+    position: relative;
+    top: 25%;
+    color: white;
+    font-family: Helvetica;
+    font-size: 18px;
+    left: 45%;
 }
 
 .header {
@@ -216,7 +225,7 @@ input[type="button"] {
 
 .FailedHTTPRequestTextdiv {
     color: #ea1212;
-    text-align: centre;
+    text-align: center;
     font-family: Helvetica;
     font-size: 22px;
     top: 40%;
@@ -344,13 +353,16 @@ input[type="button"] {
     z-index: 300;
     background-color: white;
     color: #2F528F;
-    width: 350px;
+    width: auto;
+    max-width: 600px;
     height: fit-content;
     max-height: 800px;
     border-color: #566b92;
-    border-style: solid;
-    border-width: 1px;
+    border-style: inset;
+    border-width: 2px;
     overflow: auto;
+    padding: 2px 2px;
+    line-height: 1.2;
 }
 
 .fileselect {
@@ -637,7 +649,7 @@ input[type="button"] {
 }
 
 .nexfsstatusok {
-    background-color: #4472C4;
+    background-color: #1fb078;
 }
 
 .nexfsstatusitem {
@@ -813,7 +825,7 @@ input[type="button"] {
 }
 
 .statuscircleok {
-    background-color: #4472C4;
+    background-color: #1fb078;
 }
 
 .statuscircledisabled {
@@ -1249,11 +1261,11 @@ input:checked+.slider:before {
     width: auto;
     height: 370px;
     transform: translate(-50%, 0%);
-    z-index: 99;
+    z-index: 400;
     overflow: hidden;
 }
 
-.iammgmtroleheader {
+.iamroleheader {
     height: 28px;
     width: 800px;
     left: 0px;
@@ -1261,7 +1273,7 @@ input:checked+.slider:before {
     background-color: #4472C4;
 }
 
-.iammgmtrolesdiv {
+.iamrolesdiv {
     left: 20px;
     top: 10px;
     position: relative;
@@ -1271,17 +1283,17 @@ input:checked+.slider:before {
     max-height: 500px;
 }
 
-.iammgmtrolebody {
+.iamrolebody {
     top: 0px;
     min-width: 800px;
     position: relative;
     transition: max-height 0.2s ease-out;
 }
 
-.iammgmtrolename input {
-    left: 15px;
-    top: 2px;
-    width: 700px;
+.iamrolename input {
+    left: 5px;
+    top: 1px;
+    width: 730px;
     color: #203864;
     background: white;
     border: none;
@@ -1290,7 +1302,7 @@ input:checked+.slider:before {
     position: absolute;
 }
 
-.iammgmtrolename input::placeholder {
+.iamrolename input::placeholder {
     /* Chrome, Firefox, Opera, Safari 10.1+ */
     font-family: Helvetica;
     font-size: 14px;
@@ -1299,36 +1311,35 @@ input:checked+.slider:before {
     /* Firefox */
 }
 
-.iammgmtrolename input:-ms-input-placeholder {
+.iamrolename input:-ms-input-placeholder {
     /* Internet Explorer 10-11 */
     font-family: Helvetica;
     font-size: 14px;
     color: #8ea5b3;
 }
 
-.iammgmtrolename input::-ms-input-placeholder {
+.iamrolename input::-ms-input-placeholder {
     /* Microsoft Edge */
     font-family: Helvetica;
     font-size: 14px;
     color: #8ea5b3;
 }
 
-.iammgmtrolecollapsiblebutton {
+.iamrolecollapsiblebutton {
     left: 750px;
     cursor: pointer;
     top: 6px;
     width: 20px;
     height: 20px;
-    size: 15px;
     position: absolute;
 }
 
-.iammgmtrolecollapsiblebutton img {
+.iamrolecollapsiblebutton img {
     height: 18px;
     width: auto;
 }
 
-.iammgmtrolecollapsible {
+.iamrolecollapsible {
     left: 500px;
     top: 5px;
     cursor: pointer;
@@ -1417,7 +1428,7 @@ input:checked+.slider:before {
     background-color: white;
     color: #2F528F;
     width: 720px;
-    height: 450px;
+    height: 600px;
     border-color: #566b92;
     border-style: solid;
     border-width: 1px;
@@ -1438,6 +1449,7 @@ input:checked+.slider:before {
     font-family: Helvetica;
     font-size: 16px;
     font-weight: bold;
+    cursor: help;
 }
 
 .iamedituserid {
@@ -1460,29 +1472,50 @@ input:checked+.slider:before {
     top: 140px;
 }
 
-.iamedituseremail {
+.iameditusercontentsecret {
     position: absolute;
     top: 170px;
 }
 
-.iamedituserdescription1 {
+.ianedituserposixids {
     position: absolute;
     top: 200px;
 }
 
-.iamedituserdescription2 {
+.iamedituseremail {
     position: absolute;
     top: 230px;
 }
 
-.iamedituserauthenicationmethod {
+.iamedituserdescription1 {
     position: absolute;
     top: 260px;
 }
 
-.iameditusermgmtroleselect {
+.iamedituserdescription2 {
     position: absolute;
     top: 290px;
+}
+
+.iamedituserauthenicationmethod {
+    position: absolute;
+    top: 320px;
+}
+
+.iamedituserroleselect {
+    position: absolute;
+    top: 350px;
+}
+
+.iamedituserroleselect select {
+    width: 490px;
+    overflow: auto;
+    height: 110px;
+}
+
+.iameditusermgmtroleselect {
+    position: absolute;
+    top: 420px;
 }
 
 .iameditusermgmtroleselect select {
@@ -1550,7 +1583,6 @@ input:checked+.slider:before {
     top: 7px;
     width: 20px;
     height: 20px;
-    size: 15px;
     position: absolute;
 }
 
