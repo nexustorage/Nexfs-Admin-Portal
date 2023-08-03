@@ -2967,8 +2967,19 @@ function completeiamgetmgmtlistusersrequest(response) {
 
 function completeiamroledeleterequest(response) {
     let roleid = response.getElementsByTagName("RequestCompleted")[0].getElementsByTagName("RoleId")[0].childNodes[0].nodeValue;
-    let mgmtrole = document.getElementById('iammgmtrole' + roleid);
-    mgmtrole.parentNode.removeChild(mgmtrole);
+    let roletype = response.getElementsByTagName("RequestCompleted")[0].getElementsByTagName("RoleType")[0].childNodes[0].nodeValue; 
+    let role;
+    
+    if ( roletype === "user" )
+    {
+      role = document.getElementById('iamcontentrole' + roleid);
+    }
+    else
+    {
+      role = document.getElementById('iammgmtrole' + roleid);
+    }
+
+    role.parentNode.removeChild(role);
 }
 
 function deleterole(roletype,roleid) {
@@ -2982,7 +2993,7 @@ function deleterole(roletype,roleid) {
         return;
     }
 
-    therole.parentNode.removeChild(therole);
+    /* therole.parentNode.removeChild(therole); */
 }
 
 
@@ -4157,7 +4168,7 @@ function senddeleterole(roletype, rolename, version) {
       reqparms+= '&RoleType=iam';
     }
     else { 
-        reqparms+='user';
+        reqparms+='&RoleType=user';
     }
 
     reqparms+= '&Version=' + version;
