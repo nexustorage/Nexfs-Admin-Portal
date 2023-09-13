@@ -1,18 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://nexustorage.com/" />
-    <title>Nexustorage Nexfs Admin Console</title>
-    <meta name="description" content="Nexustorage Nexfs Admin Console">
-    <link rel="stylesheet" href="nexfsmgmt.css" />
-    <script src="nexfsmgmt.js"></script>
-    <script src="crypto-min.js"></script>
-</head>
-
+<script src="nexfsmgmt.js"></script>
+<script src="crypto-min.js"></script>
 <script>
     function shownexfsid() {
       var req = new XMLHttpRequest();
@@ -22,6 +12,17 @@
       document.getElementById("headernexfsid").innerHTML = "Nexfs ID: " + req.getResponseHeader("nexfs-id") + "&nbsp;&nbsp; Region: " + req.getResponseHeader("nexfs-region");
     }
 </script>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://nexustorage.com/" />
+    <title>Nexustorage Nexfs Admin Console</title>
+    <meta name="description" content="Nexustorage Nexfs Admin Console">
+    <link rel="stylesheet" href="nexfsmgmt.css" />
+</head>
+
 
 <body onload="shownexfsid()">
     <main>
@@ -54,7 +55,7 @@
                 Nexustorage Nexfs Admin Console
             </div>
             <div id="headerreleaselabel" class="headerreleasetext">
-                Portal Release 1.01.02(23)
+                Portal Release 1.01.03(23)
             </div>
             <div id="headernexfsinfolabel" class="headernexfstext">
                 <table>
@@ -159,6 +160,9 @@
             </div>
             <div id="iam">
                 <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">Identity & Access</a>
+            </div>
+            <div id="certs">
+                <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">Certificates</a>
             </div>
             <div id="logout">
                 <a href="javascript:void(0)" onclick="selectedsidemenuchange(this)">Logout</a>
@@ -612,8 +616,21 @@
                             <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3MAXCONNECTTIMEOUT',this)">
                   Inital Connection Timeout</label><input type="number" validate="true" class="configinput" id="T3S3MAXCONNECTTIMEOUT" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
                             <br>
-                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3MAXREQTIME',this)">Maximum
-                  Request Time Allowed</label><input type="number" validate="true" class="configinput" id="T3S3MAXREQTIME" oninput="validateconfigform('storagetier3configurationdiv')" required></div>
+                            <div><label class="configlabel" onclick="showconfigurationhelp(event, 'T3S3MAXREQTIME',this)">Maximum Request Time Allowed</label>
+                                <input type="number" validate="true" class="configinput" id="T3S3MAXREQTIME" oninput="validateconfigform('storagetier3configurationdiv')" required="" livevalue="120" configurationvalue="120" tag="T3 S3 Max Request Time" help="The maximum number of seconds a S3 request can take before it is aborted" string="0" min="5" max="3600" restart="0">
+                            </div>
+                            <br>
+                            <div>
+                                <label class="configlabel" onclick="showconfigurationhelp(event, 'T3ALLOWINVALIDSSL',this)">Allow Invalid T3 Peer SSL Certificate</label>
+                                <table>
+                                    <tr>
+                                        <td class="configinput" id="T3ALLOWINVALIDSSL">
+                                            <input class="firstradio" type="radio" name="T3ALLOWINVALIDSSL" id="T3ALLOWINVALIDSSL0" value="0" onchange="validateconfigform('storagetier3configurationdiv')">No
+                                            <input type="radio" name="T3ALLOWINVALIDSSL" id="T3ALLOWINVALIDSSL1" value="1" onchange="validateconfigform('storagetier3configurationdiv')">Yes
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1272,6 +1289,18 @@
                     </table>
                 </div>
                 <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERHTTPSENABLED',this)">MgmtWeb over HTTPS</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="MGMTWEBSERVERHTTPSENABLED">
+                                <input class="firstradio" type="radio" name="MGMTWEBSERVERHTTPSENABLED" id="MGMTWEBSERVERHTTPSENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">http
+                                <input type="radio" name="MGMTWEBSERVERHTTPSENABLED" id="MGMTWEBSERVERHTTPSENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">https
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERINTERFACE',this)">API / MgmtWeb Server Interface 
                       </label><input type="text" validate="true" class="configinput inputwide" id="MGMTWEBSERVERINTERFACE" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
@@ -1338,7 +1367,18 @@
                     </table>
                 </div>
                 <br>
-                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERINTERFACE',this)">Content Server Interface 
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERHTTPSENABLED',this)">Content Server over HTTPS</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="CONTENTWEBSERVERHTTPSENABLED">
+                                <input class="firstradio" type="radio" name="CONTENTWEBSERVERHTTPSENABLED" id="CONTENTWEBSERVERHTTPSENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">http
+                                <input type="radio" name="CONTENTWEBSERVERHTTPSENABLED" id="CONTENTWEBSERVERHTTPSENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">https
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br><div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERINTERFACE',this)">Content Server Interface 
                       </label><input type="text" validate="true" class="configinput inputwide" id="CONTENTWEBSERVERINTERFACE" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
                 <br>
@@ -2036,8 +2076,115 @@
             </div>
         </div>
 
+        <div id="certificatedetailsdiv" class="hidden">
+            <div class="paneltitle">Certificate Details</div>
+            <div id="certificateinfo" class="certificatedetails" style="left:50px; top: 70px">
+                <table>
+                    <tr>
+                        <td>Index:</td>
+                        <td id="certificateIndex">-</td>
+                    </tr>
+                    <tr>
+                        <td>Common Name:</td>
+                        <td id="certificateCN">-</td>
+                    </tr>
+                    <tr>
+                        <td>Subject:</td>
+                        <td id="certificateSubject">-</td>
+                    </tr>
+                    <tr>
+                        <td>Issuer:</td>
+                        <td id="certificateIssuer">-</td>
+                    </tr>
+                    <tr>
+                        <td>Version:</td>
+                        <td id="certificateVersion">-</td>
+                    </tr>
+                    <tr>
+                        <td>Start Date:</td>
+                        <td id="certificateStart">-</td>
+                    </tr>
+                    <tr>
+                        <td>End Date:</td>
+                        <td id="certificateEnd">-</td>
+                    </tr>
+                    <tr>
+                        <td>CA:</td>
+                        <td id="certificateCA">-</td>
+                    </tr>
+                    <tr>
+                        <td>Self Signed:</td>
+                        <td id="certificateSelfSigned">-</td>
+                    </tr>
+                    <tr>
+                        <td>Management Server:</td>
+                        <td><input type="checkbox" id="certificateManagmentServer" onchange="getElementById('certificateupdate').className='button'"></td>
+                    </tr>
+                    <tr>
+                        <td>Context Server:</td>
+                        <td><input type="checkbox" id="certificateContextServer" onchange="getElementById('certificateupdate').className='button'"></td>
+                    </tr>
+                </table>
+                <br><br>
+                <table>
+                    <tr>
+                        <td>
+                            <div id="certificateclosewindow" class="button" style="left:50px;" onclick="getElementById('certificatedetailsdiv').className='hidden'">
+                                <center>Close</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="certificateupdate" class="buttondisabled" style="left:50px;" onclick="updatecertificate(this)">
+                                <center>Save</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="certificateconfigdelete" class="button" style="left:50px;" onclick="deletecertificate(this)">
+                                <center>Delete</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="certsdiv" class="paneldiv">
+            <div id="certsconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
+                &nbsp;<br><br>
+                <div class="paneltitle">Certificate List</div>
+
+                <div class="certlistdiv" id="certlistdiv">
+                    <table class="certtable" id="certtable">
+                        <th>ID</th>
+                        <th>Common Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Context Server</th>
+                        <th>Management Server</th>
+                    </table>
+                </div>
+                <div style="line-height: 1.5;">
+                    <br><br>
+                    <table>
+                        <tr>
+                            <td>
+                                <div id="certadd" class="button" style="left:50px;" onclick="showcertadddiv();">
+                                    <center>Add</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="certsreload" class="button" style="left:50px;" onclick="getconfig('ListCertificates');">
+                                    <center>Reload</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div><br>
+            </div>
+        </div>
+
         <div id="updatelicensediv" class="hidden">
-            <div id="updatelicensediv" class="updatelicensediv">
+            <div id="updatelicensethediv" class="updatelicensediv">
                 <div class="paneltitle">Update License Key</div>
                 <div id="licenseinfo" class="licenseinfo" style="left:50px; top: 70px">
                     <table>
@@ -2068,6 +2215,38 @@
                 </div>
             </div>
         </div>
+
+        <div id="addcertdiv" class="hidden">
+            <div id="addcertificatediv" class="addcertdiv">
+                <div class="paneltitle">Add Certificate</div>
+                <div id="certinfo" class="certinfo" style="left:50px; top: 70px">
+                    <table>
+                        <tr>
+                            <td colspan="2">Paste the Private Key and Certificate Chain in pem format below</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><textarea id="rawpem" name="rawpem" rows="30" cols="70" required></textarea></td>
+                        </tr>
+                        <tr>
+                            <td style="line-height:10px;" colspan=2>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div id="cancelcertadd" class="button" style="left:50px;" onclick="getElementById( 'addcertdiv').className='hidden'">
+                                    <center>Cancel</center>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="docertadd" class="button" style="left:50px;" onclick="uploadcertpem(this)">
+                                    <center>Upload</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
 
         <div id="systemstatusdiv" class="paneldiv">
             <div id="statusnexfsrefresh" class="button" style="left:900px; top: 10px" onclick="getsystemstatus(this)">

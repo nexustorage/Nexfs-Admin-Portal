@@ -539,6 +539,19 @@ input[type="button"] {
     overflow: auto;
 }
 
+.certificatedetailsdiv {
+    position: absolute;
+    top: 51px;
+    left: 201px;
+    z-index: 99;
+    width: 100%;
+    height: fit-content;
+    min-height: 900px;
+    min-width: 1300px;
+    background-color: white;
+    overflow: auto;
+}
+
 .panellabel {
     color: #203864;
     font-family: Helvetica;
@@ -688,6 +701,22 @@ input[type="button"] {
 }
 
 .licenseinfo {
+    color: #1F4E79;
+    font-family: Helvetica;
+    font-size: 14px;
+    position: absolute;
+    padding-bottom: 4px;
+}
+
+.certificatedetails {
+    color: #1F4E79;
+    font-family: Helvetica;
+    font-size: 14px;
+    position: absolute;
+    padding-bottom: 4px;
+}
+
+.certinfo {
     color: #1F4E79;
     font-family: Helvetica;
     font-size: 14px;
@@ -1234,6 +1263,16 @@ input:checked+.slider:before {
     box-shadow: 0 0 5px 1px red;
 }
 
+.certslistdiv {
+    left: 20px;
+    top: 10px;
+    position: relative;
+    overflow: auto;
+    width: 900px;
+    min-height: 200px;
+    max-height: 500px;
+}
+
 .nexfsexpothelptext {
     overflow: scroll;
     position: relative;
@@ -1742,7 +1781,24 @@ input:checked+.slider:before {
     transform: translate(-50%, 0%);
 }
 
+.certlistdiv {
+    left: 30px;
+    position: relative;
+    border-spacing: 15px;
+}
 
+.certtable {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.certtable tr:hover {
+    background-color: #203864; 
+    color: #DAE3F3;
+}
+.certtable th {
+    background-color: #DAE3F3; 
+    color: #203864;
+}
 /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
 
 @media screen and (max-height: 800px) {

@@ -1,5 +1,5 @@
 /*
-nexfsmgmt.js v1.01(23)  www.nexustorage.com
+nexfsmgmt.js v1.01.03(23)  www.nexustorage.com
 
 (c) 2022 2023 by Nexustorage Limited. All rights reserved.
 (c) 2022 2023 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
@@ -1609,6 +1609,10 @@ function selectedsidemenuchange(e) {
             if (!document.getElementById('itargetsconfigurationdiv').classList.contains("configloaded")) {
                 getconfig('GetISCSIConf');
             }
+        } else if (e.parentElement.id == "certs") {
+            if (!document.getElementById('certsconfigurationdiv').classList.contains("configloaded")) {
+                getconfig('ListCertificates');
+            }
         }
     }
 }
@@ -2265,7 +2269,7 @@ function ActivateSessionPermissions(sessionpermissions) {
     const optionconfenableforms = ['storageindexconfigurationdiv', 'storagetier1configurationdiv', 'storagetier2configurationdiv', 'storagetier3configurationdiv',
         'storagescheduledmigrationsconfigurationdiv'
     ];
-    const optionids = ['systemstatus', 'nexfsconfiguration', 'nfs', 'iscsi', 'license', 'servicemanagement', 'pausenexfs', 'enableiscsi', 'enablenfs', 'managenfs', 'iam'];
+    const optionids = ['systemstatus', 'nexfsconfiguration', 'nfs', 'iscsi', 'license', 'servicemanagement', 'pausenexfs', 'enableiscsi', 'enablenfs', 'managenfs', 'iam', 'certs'];
 
 
     for (let optionform of optiondisableforms) {
@@ -2331,6 +2335,8 @@ function ActivateSessionPermissions(sessionpermissions) {
         } else if (action == 'iscsi:GetSubSystem') {
             document.getElementById('enableiscsi').classList.remove("optiondisabled");
             document.getElementById('servicemanagement').classList.remove("optiondisabled");
+        } else if (action == 'nexfs:ManageCertificate') {
+            document.getElementById('certs').classList.remove("optiondisabled");
         } else if (action == 'nexfs:GetLicenseDetails') {
             document.getElementById('license').classList.remove("optiondisabled");
         } else if (action == 'nexfs:UpdateLicense') {
@@ -2485,9 +2491,18 @@ function RequestComplete() {
                 completegetconfsrequest(JSON.parse(RequestStatus.responseText));
             } else if (requesturl.includes('Action=UpdateConfigs')) {
                 if (document.getElementById('reloadconfdiv').innerHTML !== null) {
-                    var reloadconfdiv = document.getElementById('reloadconfdiv').innerHTML;
-                    document.getElementById('reloadconfdiv').innerHTML = "";
-                    createconfvarsrequest(reloadconfdiv);
+                    if ( document.getElementById('reloadconfdiv').innerHTML == 'certificatedetails' )
+                    {
+                        document.getElementById('certificatedetailsdiv').className = 'hidden';
+                        document.getElementById('certificateupdate').className = 'buttondisabled';
+                        getconfig('ListCertificates');
+                    }
+                    else
+                    {
+                      var reloadconfdiv = document.getElementById('reloadconfdiv').innerHTML;
+                      document.getElementById('reloadconfdiv').innerHTML = "";
+                      createconfvarsrequest(reloadconfdiv);
+                    }
                 }
             } else if (requesturl.includes('Action=GetDirectoryListing')) {
                 document.getElementById('fileselectdiv').classList.remove("hidden");
@@ -2552,6 +2567,16 @@ function RequestComplete() {
                 completecreatefolder();
             } else if (requesturl.includes('Action=CreateFile')) {
                 completecreatefile();
+            } else if (requesturl.includes('Action=PutCertificate')) {
+                completeputcertificate();
+            } else if (requesturl.includes('Action=ListCertificates')) {
+                completelistcertificates(RequestStatus.responseXML);
+            }
+            else if (requesturl.includes('Action=GetCertificate')) {
+                completeloadcertificate(RequestStatus.responseXML);
+            }
+            else if (requesturl.includes('Action=DeleteCertificate')) {
+                completedeletecertificate(RequestStatus.responseXML);
             }
         }
     }
@@ -2859,6 +2884,7 @@ function completeiamgetmgmtupdateuserrequest() {
     
 }
 
+
 function completeiamgetmgmtcreateuserrequest(requesttype) {
     document.getElementById('iamedituserdiv').classList.add('hidden');
     document.getElementById('iameditusersecret').value = '';
@@ -2992,8 +3018,10 @@ function deleterole(roletype,roleid) {
         senddeleterole(roletype, document.getElementById(roletype+'rolename' + roleid).value, document.getElementById(roletype+'roleversion' + roleid).value);
         return;
     }
-
-    /* therole.parentNode.removeChild(therole); */
+    else
+    {
+       therole.parentNode.removeChild(therole); 
+    }
 }
 
 
@@ -4159,6 +4187,178 @@ function sendgetconfsreq(reqjson, mode) {
     HttpRequest.send();
 }
 
+function completeputcertificate() {
+    document.getElementById('rawpem').value='';
+    document.getElementById( 'addcertdiv').className='hidden'; 
+    getconfig('ListCertificates');
+}
+
+function completedeletecertificate() {
+    document.getElementById('certificatedetailsdiv').className='hidden'; 
+    getconfig('ListCertificates');
+}
+
+function completelistcertificates(response) {
+    let certtable = document.getElementById("certtable");
+
+    while (certtable.rows.length > 1) {
+        certtable.deleteRow(1);
+    }
+
+    let RequestCompleted = response.getElementsByTagName("RequestCompleted")[0];
+    let GetCertificatesResponse = RequestCompleted.getElementsByTagName("GetCertificatesResponse")[0];
+    let Certificates = GetCertificatesResponse.getElementsByTagName("Certificates")[0];
+    let CertificateList = Certificates.getElementsByTagName("Certificate");
+    let cnRegex = /CN=([^/]+)/;
+
+    for (let Certificate = 0; Certificate < CertificateList.length; Certificate++) {
+        let Index = CertificateList[Certificate].getElementsByTagName('Index')[0].childNodes[0].nodeValue;
+        let Subject = CertificateList[Certificate].getElementsByTagName('Subject')[0].childNodes[0].nodeValue;
+        let ValidFrom =  CertificateList[Certificate].getElementsByTagName('ValidFrom')[0].childNodes[0].nodeValue;
+        let ValidUntil =  CertificateList[Certificate].getElementsByTagName('ValidUntil')[0].childNodes[0].nodeValue;
+        let ContextServer =  CertificateList[Certificate].getElementsByTagName('ContextServer')[0].childNodes[0].nodeValue;
+        let ManagementServer =  CertificateList[Certificate].getElementsByTagName('ManagementServer')[0].childNodes[0].nodeValue;
+
+        let newrow = certtable.insertRow(-1);
+        let indexcell = newrow.insertCell(0);
+        let issuercell = newrow.insertCell(1);
+        let validfromcell = newrow.insertCell(2);
+        let validtocell = newrow.insertCell(3);
+
+        let cnMatch = Subject.match(cnRegex);
+
+        indexcell.innerHTML=Index;
+        issuercell.innerHTML=cnMatch[1];
+        validfromcell.innerHTML=ValidFrom;
+        validtocell.innerHTML=ValidUntil;
+
+    
+        let contextcertcell = newrow.insertCell(4);
+        if ( ContextServer == "True" )
+        {
+          contextcertcell.innerHTML = '<center><input type="checkbox" checked </center>';    
+        }
+
+        let mgmtcertcell = newrow.insertCell(5);
+        if ( ManagementServer == "True" )
+        {
+          mgmtcertcell.innerHTML = '<center><input type="checkbox" checked </center>';    
+        }
+
+        newrow.addEventListener("click",  function() { loadcertificate(Index) } );
+    }
+}
+
+function loadcertificate(Index)
+{
+  var HttpRequest = new XMLHttpRequest();
+  
+  const reqinfo = {};
+  var reqparms = '&CerfificateIDX=' + Index; 
+  if (createHttpRequest(reqinfo, 'GetCertificate', reqparms, 0, HttpRequest) == null) return;
+  HttpRequest.send();
+}
+
+function completeloadcertificate(response)
+{
+  let RequestCompleted = response.getElementsByTagName("RequestCompleted")[0];
+  let GetCertificatesResponse = RequestCompleted.getElementsByTagName("GetCertificatesResponse")[0];
+  let Certificate = GetCertificatesResponse.getElementsByTagName("Certificate")[0];
+  let cnRegex = /CN=([^/]+)/;
+  let cnMatch =  Certificate.getElementsByTagName('Subject')[0].childNodes[0].nodeValue.match(cnRegex);
+
+  document.getElementById('certificateIndex').innerHTML = Certificate.getElementsByTagName('Index')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateCN').innerHTML = cnMatch[1]; 
+  document.getElementById('certificateSubject').innerHTML = Certificate.getElementsByTagName('Subject')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateIssuer').innerHTML = Certificate.getElementsByTagName('Issuer')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateVersion').innerHTML = Certificate.getElementsByTagName('Version')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateStart').innerHTML =  Certificate.getElementsByTagName('ValidFrom')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateEnd').innerHTML =  Certificate.getElementsByTagName('ValidUntil')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateCA').innerHTML =  Certificate.getElementsByTagName('ca')[0].childNodes[0].nodeValue;
+  document.getElementById('certificateSelfSigned').innerHTML =  Certificate.getElementsByTagName('SelfSigned')[0].childNodes[0].nodeValue;
+  
+  if ( Certificate.getElementsByTagName('ContextServer')[0].childNodes[0].nodeValue == "True" ) {
+    document.getElementById('certificateContextServer').checked = true;
+    document.getElementById('certificateContextServer').setAttribute("loadedvalue","1");
+  }
+  else
+  {
+    document.getElementById('certificateContextServer').checked = false;
+    document.getElementById('certificateContextServer').setAttribute("loadedvalue","0");
+  }
+
+  if ( Certificate.getElementsByTagName('ManagementServer')[0].childNodes[0].nodeValue == "True" ) {
+    document.getElementById('certificateManagmentServer').checked = true; 
+    document.getElementById('certificateManagmentServer').setAttribute("loadedvalue","1");
+  }
+  else
+  {
+    document.getElementById('certificateManagmentServer').checked = false; 
+    document.getElementById('certificateManagmentServer').setAttribute("loadedvalue","0");
+  }
+
+  document.getElementById('certificatedetailsdiv').className = 'certificatedetailsdiv';
+}
+
+function deletecertificate()
+{
+   if (confirm("Are you sure you want to delete certificate at index  " + document.getElementById('certificateIndex').innerHTML + "?") == true) {
+     const reqinfo = {};
+     var HttpRequest = new XMLHttpRequest();
+     var reqparms = '&CerfificateIDX=' + document.getElementById('certificateIndex').innerHTML; 
+     if (createHttpRequest(reqinfo, 'DeleteCertificate', reqparms, 0, HttpRequest) == null) return;
+     HttpRequest.send();
+   }
+}
+
+function updatecertificate()
+{
+  let addcomma=0;
+  let json = '{ "Configs": [ ';
+
+  if ( document.getElementById('certificateManagmentServer').checked && document.getElementById('certificateManagmentServer').getAttribute('loadedvalue') == "0" ) 
+  {
+    json+= '{ "VarName": "MGMTWEBSERVERCERTIFICATEIDX","NewValue": "' + document.getElementById('certificateIndex').innerHTML + '","UpdateMode": "3"}';
+    addcomma=1;
+  }
+  else if ( ! document.getElementById('certificateManagmentServer').checked  && document.getElementById('certificateManagmentServer').getAttribute('loadedvalue') == "1" ) 
+  {
+    json+= '{ "VarName": "MGMTWEBSERVERCERTIFICATEIDX","NewValue": "0","UpdateMode": "3"}';
+    addcomma=1;
+  }
+  
+  if ( document.getElementById('certificateContextServer').checked  && document.getElementById('certificateContextServer').getAttribute('loadedvalue') == "0" )
+  {
+    if ( addcomma == 1 ) {
+        json+=',';
+    }
+    json+= '{ "VarName": "CONTENTWEBSERVERCERTIFICATEIDX","NewValue": "' + document.getElementById('certificateIndex').innerHTML + '","UpdateMode": "3"}';
+  }
+  else if ( ! document.getElementById('certificateContextServer').checked  && document.getElementById('certificateContextServer').getAttribute('loadedvalue') == "1" )
+  {
+    if ( addcomma == 1 ) {
+        json+=',';
+    }
+    json+= '{ "VarName": "CONTENTWEBSERVERCERTIFICATEIDX","NewValue": "0","UpdateMode": "3"}';
+  }
+
+  json+='] }';
+
+  UpdateConfigs(json, 'certificatedetails');
+}
+
+function uploadcertpem()
+{
+  if ( document.getElementById("docertadd").className == 'buttondisabled' ) return;
+
+  var HttpRequest = new XMLHttpRequest();
+
+  const reqinfo = {};
+  var reqparms = '&Cerfificate=' + document.getElementById('rawpem').value;
+  if (createHttpRequest(reqinfo, 'PutCertificate', reqparms, 0, HttpRequest) == null) return;
+  HttpRequest.send();
+}
+
 function senddeleterole(roletype, rolename, version) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
@@ -4187,7 +4387,7 @@ function sendupdatesecretrequest(oldhash, newhash) {
 function getsessionpermissions() {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListManagementRoles", "iam:DeleteManagementRoles", "nexfs:GetContentRoles","nexfs:ListContentRoles", "nexfs:UpdateContentRoles", "nexfs:DeleteManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateOtherUserContentSecret","iam:UpdateUsers", "iam:UpdateOwnSecret"]}';
+    var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListManagementRoles", "iam:DeleteManagementRoles", "nexfs:GetContentRoles","nexfs:ListContentRoles", "nexfs:UpdateContentRoles", "nexfs:DeleteManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateOtherUserContentSecret","iam:UpdateUsers", "iam:UpdateOwnSecret", "nexfs:ManageCertificate" ]}';
     var reqparms = '&RequestJSON=' + reqjson;
     if (createHttpRequest(reqinfo, 'GetSessionPermissions', reqparms, 0, HttpRequest, true) == null) return;
     HttpRequest.send();
@@ -4255,4 +4455,9 @@ function showupdatelicensediv() {
     HttpRequest.onreadystatechange = UpdateCurrentLicenseDetails;
     HttpRequest.send();
     document.getElementById('updatelicensediv').className = 'paneldiv';
+}
+
+function showcertadddiv() {
+    const reqinfo = {};
+    document.getElementById('addcertdiv').className = 'paneldiv';
 }
