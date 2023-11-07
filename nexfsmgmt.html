@@ -55,7 +55,7 @@
                 Nexustorage Nexfs Admin Console
             </div>
             <div id="headerreleaselabel" class="headerreleasetext">
-                Portal Release 1.01.03(23)
+                Portal Release 1.01.04(23)
             </div>
             <div id="headernexfsinfolabel" class="headernexfstext">
                 <table>
@@ -776,8 +776,13 @@
               Between Background Deletions</label><input type="number" validate="true" class="configinput" id="DELETESLEEPMS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required>
                     </div>
                     <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETEFAILEDRETRYMINS',this)">Retry Delete Minutes
+                         </label><input type="number" validate="true" class="configinput" id="DELETEFAILEDRETRYMINS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required>
+                    </div>
+                    <br>
                     <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETEMAXTHREADS',this)">Background
-              Deletion Threads*</label><input type="number" validate="true" class="configinput" id="DELETEMAXTHREADS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required></div>
+              Deletion Threads*</label><input type="number" validate="true" class="configinput" id="DELETEMAXTHREADS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required>
+                    </div>
                     <br>
                     <br>
                     <div id="harddeletions"><label class="switchlabel" onclick="showconfigurationhelp(event, 'ENABLEHARDDELETE',this)">Enable Hard Deletes*</label>

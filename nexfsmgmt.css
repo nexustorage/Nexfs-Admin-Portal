@@ -109,6 +109,11 @@ label {
     color: #2f5597;
 }
 
+.configinputhighlight {
+    font-style:italic;
+    font-weight: bold;
+}
+
 .inputdirectory {
     width: 500px;
 }

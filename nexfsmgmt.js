@@ -1,5 +1,5 @@
 /*
-nexfsmgmt.js v1.01.03(23)  www.nexustorage.com
+nexfsmgmt.js v1.01.04(23)  www.nexustorage.com
 
 (c) 2022 2023 by Nexustorage Limited. All rights reserved.
 (c) 2022 2023 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
@@ -2026,6 +2026,13 @@ function completegetconfsrequest(confjson) {
                 thetarget = document.getElementById(key + '0');
                 thetarget.setAttribute('livevalue', configs[key].LiveValue);
                 thetarget.setAttribute('configurationvalue', configs[key].ConfigValue);
+            }
+
+            if ( configs[key].LiveValue !== configs[key].ConfigValue ) {
+              thetarget.classList.add('configinputhighlight');
+            }
+            else {
+              thetarget.classList.remove('configinputhighlight');
             }
 
             if (configs[key].String == '1') {
