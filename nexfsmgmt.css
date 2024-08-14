@@ -102,7 +102,7 @@ label {
 }
 
 .configinput {
-    left: 300px;
+    left: 325px;
     position: absolute;
     font-family: Helvetica;
     font-size: 14px;
@@ -216,17 +216,19 @@ input[type="button"] {
 
 .FailedHTTPRequest {
     position: fixed;
-    /* Stay in place */
-    top: 51px;
-    /* Stay at the top */
+    top: 51px; /* Stay at the top, accounting for any header */
     left: 0;
-    z-index: 999;
-    /* Stay near the top */
+    z-index: 999; /* Ensure the error message appears above other content */
     width: 100%;
-    height: 100%;
-    background-color: white;
-    visibility: hidden;
+    height: calc(100% - 51px); /* Adjust height to account for the top offset */
+    background-color: rgba(255, 255, 255, 0.95); /* Slight transparency for a subtle overlay effect */
+    display: flex; /* Use Flexbox for centering content */
+    justify-content: center;
+    align-items: center;
+    visibility: hidden; /* Keep hidden by default, can be toggled via JS */
+    overflow: auto; /* Allow scrolling if content overflows */
 }
+
 
 .FailedHTTPRequestTextdiv {
     color: #ea1212;
@@ -1206,7 +1208,7 @@ input:checked+.slider:before {
     overflow: auto;
     width: 900px;
     min-height: 200px;
-    max-height: 500px;
+    height: auto;
 }
 
 .iscsirefreshicon img {

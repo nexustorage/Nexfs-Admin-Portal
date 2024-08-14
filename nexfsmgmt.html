@@ -55,7 +55,7 @@
                 Nexustorage Nexfs Admin Console
             </div>
             <div id="headerreleaselabel" class="headerreleasetext">
-                Portal Release 1.01.04(23)
+                Portal Release 1.5
             </div>
             <div id="headernexfsinfolabel" class="headernexfstext">
                 <table>
@@ -77,8 +77,10 @@
                     <table>
                         <tr>
                             <td>
-                                <center>An error communicating with the Nexfs Server has occured</center>
+                                <center>The request could not be completed</center>
                             </td>
+                        </tr>
+                        <tr style="height: 15px;">
                         </tr>
                         <tr>
                             <td>
@@ -1383,12 +1385,21 @@
                         </tr>
                     </table>
                 </div>
-                <br><div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERINTERFACE',this)">Content Server Interface 
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERDEFAULTHOST',this)">Content Server DNS Name 
+                      </label><input type="text" validate="true" class="configinput inputwide" id="CONTENTWEBSERVERDEFAULTHOST" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERINTERFACE',this)">Content Server Interface 
                       </label><input type="text" validate="true" class="configinput inputwide" id="CONTENTWEBSERVERINTERFACE" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
                 <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERPORT',this)">Content Server Port 
                       </label><input type="number" validate="true" class="configinput" id="CONTENTWEBSERVERPORT" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERMAXSERVERS',this)">Content Server Max Servers 
+                      </label><input type="number" validate="true" class="configinput" id="CONTENTWEBSERVERMAXSERVERS" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
                 <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERMAXCONNECTIONS',this)">Content Server Max Connections 
@@ -1400,15 +1411,47 @@
                 </div>
                 <br>
                 <div>
-                    <label class="configlabel" onclick="showconfigurationhelp(event, 'S3USESHA256ETAG',this)">S3 Return SHA256 etag</label>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'S3USEMD5ETAG',this)">Content Server Return SHA256 etag</label>
                     <table>
                         <tr>
-                            <td class="configinput" id="S3USESHA256ETAG">
-                                <input class="firstradio" type="radio" name="S3USESHA256ETAG" id="S3USESHA256ETAG0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
-                                <input type="radio" name="S3USESHA256ETAG" id="S3USESHA256ETAG1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            <td class="configinput" id="S3USEMD5ETAG">
+                                <input class="firstradio" type="radio" name="S3USEMD5ETAG" id="S3USEMD5ETAG0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="S3USEMD5ETAG" id="S3USEMD5ETAG1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
                             </td>
                         </tr>
                     </table>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'ANONYMOUSENABLED',this)">Content Server Allow Anonymous</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="ANONYMOUSENABLED">
+                                <input class="firstradio" type="radio" name="ANONYMOUSENABLED" id="ANONYMOUSENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="ANONYMOUSENABLED" id="ANONYMOUSENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ANONYMOUSUSERID',this)">Anonyumous User ID
+                      </label><input type="text" validate="true" class="configinput inputwide" id="ANONYMOUSUSERID" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'AANONYMOUSENFORCEREGION',this)">Content Server Enforce Anonymous Region</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="ANONYMOUSENFORCEREGION">
+                                <input class="firstradio" type="radio" name="ANONYMOUSENFORCEREGION" id="ANONYMOUSENFORCEREGION0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="ANONYMOUSENFORCEREGION" id="ANONYMOUSENFORCEREGION1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DEFAULTTENANT',this)">Default Tenant
+                      </label><input type="text" validate="true" class="configinput inputwide" id="DEFAULTTENANT" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
                 <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'WSCONNECTIONIDLETIMEOUTSECONDS',this)">Content Server idle request timeout 
@@ -1910,9 +1953,9 @@
 
         <div id="iscsidiv" class="paneldiv">
             <div class="topmenutab">
-                <button name="itargets" class="topmenutablinks active" onclick="changetopmenuselected(event, 'iscsidiv')">Targets</button>
-                <button name="iaccounts" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Accounts</button>
-                <button name="iinterfaces" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Interfaces</button>
+                <button name="itargets" id="itargetsbutton" class="topmenutablinks active" onclick="changetopmenuselected(event, 'iscsidiv')">Targets</button>
+                <button name="iaccounts" id="iaccountsbutton" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Accounts</button>
+                <button name="iinterfaces" id="iinterfacesbutton" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Interfaces</button>
             </div>
             <div id="itargetsconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
                 &nbsp;<br><br>

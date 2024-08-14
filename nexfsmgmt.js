@@ -1,8 +1,8 @@
 /*
-nexfsmgmt.js v1.01.04(23)  www.nexustorage.com
+nexfsmgmt.js v1.5  www.nexustorage.com
 
-(c) 2022 2023 by Nexustorage Limited. All rights reserved.
-(c) 2022 2023 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
+(c) 2022 2023 2024 by Nexustorage Limited. All rights reserved.
+(c) 2022 2023 2024 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
 // This file is part of Nexustorage Nexfs Storage stack
 //
 // This program is free software: you can redistribute it and/or modify
@@ -408,7 +408,7 @@ function iscsitargetadd(targetid) {
         '          <tr>' +
         '            <td><div class="iscsilabel" onclick="openshowhelp(@iscsitargetheaderdigest@)">Header Digest</div></td>' +
         '            <td class="iscsitargetidvalue"><input type="checkbox" name="iscsitargetX" id="iscsitargetheaderdigestX" ONCHANGE></td>' +
-        '            <td rowspan="2"><div class="iscsiselect"><select id="iscsitargetinterfacesX" multiple ONCHANGE></select></div></td>' +
+        '            <td rowspan="2"><div class="iscsiselect"><select id="iscsitargetinterfacesX" multiple ></select></div></td>' +
         '            <td><div class="iscsirefreshicon"><img src="RefreshIcon.png" onclick="refreshiscsiinterfacelist(@X@,@0@)"></div></td>' +
         '            <td rowspan="2"><div class="iscsiselect"><select id="iscsiinboundaccountsX" multiple ONCHANGE></select></div></td>' +
         '            <td ><div class="iscsiselect"><select id="iscsitargetaccountsX" ONCHANGE><option value="n0n3xfs0utb0undacc0unt" bound="0"></option></select></div></td>' +
@@ -2115,7 +2115,7 @@ function saveformconfvars(confform) {
                 json += ',';
             }
 
-            if ( varname === "CONTENTWEBSERVERMAXCONNECTIONS" && document.getElementById('statuscontentserverstatustext').innerHTML == "OK" )
+            if ( (varname === "CONTENTWEBSERVERMAXCONNECTIONS" || varname == "CONTENTWEBSERVERMAXSERVERS") && document.getElementById('statuscontentserverstatustext').innerHTML == "OK" )
             {
                 restart=1;
             }
@@ -2612,6 +2612,7 @@ function targetaddoption(theselect, thevalue, selected, multiselect) {
                 } else {
                     this.selected = true;
                 }
+                enableiscsitargetbuttons();
                 return false;
             }, false);
     }
@@ -3327,7 +3328,7 @@ function updateiscsiinterfacelistselect(iscsijson) {
         let newoption = document.createElement("option");
         newoption.value = "ALL";
         newoption.text = "ALL";
-        newoption.setAttribute("bound", "0");
+        newoption.selected = true;
         document.getElementById("iscsitargetinterfaces" + updaterow).add(newoption);
     }
 }
@@ -3359,14 +3360,10 @@ function completeiscsigetrequest(iscsijson) {
     document.getElementById('iscsitargetsdiv').setAttribute('updatenext', '0');
     document.getElementById('iscsitargetsdiv').setAttribute('updating', 'all');
     document.getElementById('iscsitargetsdiv').setAttribute('updatingid', '0');
-}
 
-function completeiscsiputrequest() {
-    let activesection = document.getElementById('iscsidiv').getElementsByClassName('topmenutablinks active');
-
-    if (activesection[0].id == 'itargetsconfigurationdiv') {
+    if (activesection[0].id == 'itargetsbutton') {
         document.getElementById('iscsitargetsave').className = 'buttondisabled';
-    } else if (activesection[0].id == 'iaccountsconfigurationdiv') {
+    } else if (activesection[0].id == 'iaccountsbutton') {
         document.getElementById('iscsiaccountsave').className = 'buttondisabled';
         document.getElementById('iscsiaccountrevert').className = 'buttondisabled';
     } else {
@@ -3374,8 +3371,12 @@ function completeiscsiputrequest() {
         document.getElementById('iscsiinterfacerevert').className = 'buttondisabled';
     }
 
+}
+
+function completeiscsiputrequest() {
     document.getElementById('iscsitargetsdiv').setAttribute('updating', 'all');
     document.getElementById('iscsitargetsdiv').setAttribute('updatingid', '0');
+
     getconfig('GetISCSIConf');
 }
 
@@ -3415,6 +3416,26 @@ function tokenRequestProgress() {
 }
 
 
+function encodejson(jsonstr) {
+    return encodeURIComponent(jsonstr)
+           .replace(/!/g, '%21')
+           .replace(/'/g, '%27')
+           .replace(/:::(/g, '%28')
+           .replace(/:::)/g, '%29')
+           .replace(/:::*/g, '%2A')
+           .replace(/~/g, '%7E')
+           .replace(/%20/g, '%20')  /* Space */
+           .replace(/%2F/g, '%2F')  /* Slash (/) */
+           .replace(/%3A/g, '%3A')  /* Colon (:) */
+           .replace(/%3B/g, '%3B')  /* Semicolon (;) */
+           .replace(/%40/g, '%40')  /* At sign (@) */
+           .replace(/:::,/g, '%2C')  /* Comma (,) */
+           .replace(/%24/g, '%24')  /* Dollar sign ($) */
+           .replace(/%26/g, '%26')  /* Ampersand (&) */
+           .replace(/%3D/g, '%3D'); /* Equal sign (=) */
+}
+
+
 function createrequesttoken(reqinfo) {
     const region = "nexfs";
     const service = "nexfsconsoleapi";
@@ -3447,7 +3468,7 @@ function createrequesttoken(reqinfo) {
     let signed_headers = 'host;x-amz-content-sha256;x-amz-date';
 
     /* let canonical_request = 'GET\\n/' + service + '\\n' + encodeURI(reqinfo.request_parameters) + '\\n' + canonical_headers + '\\n' + signed_headers + '\\n' + reqinfo.contentsha256; */
-    let canonical_request = 'GET\\n/' + service + '\\n' + reqinfo.request_parameters + '\\n' + canonical_headers + '\\n' + signed_headers + '\\n' + reqinfo.contentsha256;
+    let canonical_request = 'GET\\n/' + service + '\\n' + reqinfo.request_parameters + '\\n' + canonical_headers + '\\n' + signed_headers + '\\n' + reqinfo.contentsha256; 
 
     let canonicalrequestsignature = new CryptoSHA256.SHA256(canonical_request).toString(CryptoSHA256.enc.Hex);
 
@@ -3983,7 +4004,7 @@ function dirlisting(basedir) {
 function getdirectorylisting(basedir, mode) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&ListDir=' + basedir + '&Mode=' + mode;
+    var reqparms = '&ListDir=' + encodejson(basedir) + '&Mode=' + mode;
     if (createHttpRequest(reqinfo, 'GetDirectoryListing', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4157,7 +4178,7 @@ function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabl
         action = 'CreateRole';
     }
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&AssumeRolePolicyDocument=' + Statement + '&Enabled=' + Enabled;
+    var reqparms = '&AssumeRolePolicyDocument=' + encodejson(Statement) + '&Enabled=' + Enabled;
 
     if (RoleId != null) {
         reqparms += '&RoleId=' + RoleId;
@@ -4171,7 +4192,7 @@ function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabl
         reqparms+='user';
     }
 
-    reqparms +='&Version=' + Version;
+    reqparms +='&Version=' + encodejson(Version);
 
 
     if (createHttpRequest(reqinfo, action, reqparms, 0, HttpRequest) == null) return;
@@ -4189,7 +4210,7 @@ function getuser(userid) {
 function sendgetconfsreq(reqjson, mode) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&Mode=' + mode + '&RequestJSON=' + reqjson;
+    var reqparms = '&Mode=' + mode + '&RequestJSON=' +  encodejson(reqjson);
     if (createHttpRequest(reqinfo, 'GetConfigs', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4361,7 +4382,7 @@ function uploadcertpem()
   var HttpRequest = new XMLHttpRequest();
 
   const reqinfo = {};
-  var reqparms = '&Cerfificate=' + document.getElementById('rawpem').value;
+  var reqparms = '&Cerfificate=' + encodejson(document.getElementById('rawpem').value);
   if (createHttpRequest(reqinfo, 'PutCertificate', reqparms, 0, HttpRequest) == null) return;
   HttpRequest.send();
 }
@@ -4369,7 +4390,7 @@ function uploadcertpem()
 function senddeleterole(roletype, rolename, version) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RoleName=' + rolename; 
+    var reqparms = '&RoleName=' + encodejson(rolename); 
 
     if ( roletype == 'iammgmt' ) {
       reqparms+= '&RoleType=iam';
@@ -4378,7 +4399,7 @@ function senddeleterole(roletype, rolename, version) {
         reqparms+='&RoleType=user';
     }
 
-    reqparms+= '&Version=' + version;
+    reqparms+= '&Version=' + encodejson(version);
     if (createHttpRequest(reqinfo, 'DeleteRole', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4395,7 +4416,7 @@ function getsessionpermissions() {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListManagementRoles", "iam:DeleteManagementRoles", "nexfs:GetContentRoles","nexfs:ListContentRoles", "nexfs:UpdateContentRoles", "nexfs:DeleteManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateOtherUserContentSecret","iam:UpdateUsers", "iam:UpdateOwnSecret", "nexfs:ManageCertificate" ]}';
-    var reqparms = '&RequestJSON=' + reqjson;
+    var reqparms = '&RequestJSON=' + encodejson(reqjson);
     if (createHttpRequest(reqinfo, 'GetSessionPermissions', reqparms, 0, HttpRequest, true) == null) return;
     HttpRequest.send();
 }
@@ -4426,7 +4447,7 @@ function uploadlicensekey() {
 function SendJSONrequest(json, requestaction) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RequestJSON=' + json;
+    var reqparms = '&RequestJSON=' + encodejson(json);
     if (createHttpRequest(reqinfo, requestaction, reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4434,7 +4455,7 @@ function SendJSONrequest(json, requestaction) {
 function UpdateConfigs(json, confformtoreload) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RequestJSON=' + json;
+    var reqparms = '&RequestJSON=' + encodejson(json);
     if (createHttpRequest(reqinfo, 'UpdateConfigs', reqparms, 0, HttpRequest) == null) return;
     document.getElementById('reloadconfdiv').innerHTML = confformtoreload;
     HttpRequest.send();
@@ -4443,7 +4464,7 @@ function UpdateConfigs(json, confformtoreload) {
 function UpdateConfig(varname, newvalue, mode, hidediv) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&ConfigurationNewValue=' + newvalue + '&ConfigurationVarName=' + varname + '&UpdateMode=' + mode;
+    var reqparms = '&ConfigurationNewValue=' + encodejson(newvalue) + '&ConfigurationVarName=' + varname + '&UpdateMode=' + mode;
     if (createHttpRequest(reqinfo, 'UpdateConfig', reqparms, 0, HttpRequest) == null) return;
 
     if (hidediv == null)
