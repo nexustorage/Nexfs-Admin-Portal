@@ -403,7 +403,7 @@ function iscsitargetadd(targetid) {
         '            <td><div class="iscsilabel" onclick="openshowhelp(@iSCSItargetinterface@)">Interfaces</div></td>' +
         '            <td></td>' +
         '            <td><div class="iscsilabel" onclick="openshowhelp(@iSCSItargetaccount@)">Inbound Accounts</div></td>' +
-        '            <td><div class="iscsilabel" onclick="openshowhelp(@iSCSItargetaccount@)">Outbound Account</div></td>' +
+        '            <td><div class="iscsilabel" onclick="openshowhelp(@iSCSItargetoutboundaccount@)">Outbound Account</div></td>' +
         '          </tr>' +
         '          <tr>' +
         '            <td><div class="iscsilabel" onclick="openshowhelp(@iscsitargetheaderdigest@)">Header Digest</div></td>' +
@@ -415,7 +415,7 @@ function iscsitargetadd(targetid) {
         '            <td><div class="iscsirefreshicon"><img src="RefreshIcon.png" onclick="refreshiscsiaccountlist(@X@,@0@)"></div></td>' +
         '          </tr>' +
         '          <tr>' +
-        '            <td><div class="iscsilabel" onclick="openshowhelp(@iscsitargetheaderdigest@)">Data Digest</div></td>' +
+        '            <td><div class="iscsilabel" onclick="openshowhelp(@iscsitargetdatadigest@)">Data Digest</div></td>' +
         '            <td class="iscsitargetidvalue"><input type="checkbox" name="iscsitargetX" id="iscsitargetdatadigestX" ONCHANGE></td>' +
         '          </tr>' +
         '        </table>' +
@@ -557,12 +557,12 @@ function iscsiinterfaceadd() {
         '</div>';
 
     const interfacehtml = rawhtml.replace(/@/g, "'");
-    let nextnterfaceid = parseInt(document.getElementById('iscsiinterfacesdiv').getAttribute('iscsiinterfacecount'));
+    let nextnterfaceid = parseInt(document.getElementById('iscsiinterfacesdiv').getAttribute('iscsiinterfacebindingscount'));
     nextnterfaceid++;
     const nfsexporthtmlwithonchange = interfacehtml.replace(/ONCHANGE/g, onchange);
     const nfsexporthtmlwithondelete = nfsexporthtmlwithonchange.replace(/ONDELETE/g, ondelete);
     const nfsexporthtmlwithid = nfsexporthtmlwithondelete.replace(/X/g, nextnterfaceid);
-    document.getElementById('iscsiinterfacesdiv').setAttribute('iscsiinterfacecount', nextnterfaceid);
+    document.getElementById('iscsiinterfacesdiv').setAttribute('iscsiinterfacebindingscount', nextnterfaceid);
     document.getElementById('iscsiinterfacesdiv').insertAdjacentHTML('beforeend', nfsexporthtmlwithid);
     enableiscsibuttons('iscsiinterface');
     return nextnterfaceid;
@@ -1316,28 +1316,40 @@ function populateiscsiaccountdiv(iscsijson) {
 }
 
 function populateiscsiinterfacediv(iscsijson) {
-    document.getElementById('iscsiinterfacesdiv').setAttribute('iscsiinterfacecount', '0');
+    document.getElementById('iscsiinterfacesdiv').setAttribute('iscsiinterfacebindingscount', '0');
     document.getElementById('iscsiinterfacesdiv').innerHTML = "";
 
     const iscsiinterfacelist = iscsijson.interfaces;
-    const iscsiinterfaces = Object.keys(iscsiinterfacelist);
-    iscsiinterfaces.forEach(function(entry) {
+
+    iscsiinterfacelist.forEach(function(entry) {
         let interfaceid = iscsiinterfaceadd();
-        let interfacedetails = iscsiinterfacelist[entry].interface.address.split(':');
-        document.getElementById('iscsiinterfaceaddress' + interfaceid).value = interfacedetails[0];
+        let address = entry.interface.address;
+        let ip, port;
+
+        if (address.startsWith('[') && address.includes(']:')) {
+            let lastBracketIndex = address.lastIndexOf(']');
+            ip = address.substring(0, lastBracketIndex + 1); 
+            port = address.substring(lastBracketIndex + 2);  
+        } else {
+            let parts = address.split(':');
+            ip = parts[0];
+            port = parts[1];
+        }
+
+        document.getElementById('iscsiinterfaceaddress' + interfaceid).value = ip;
         document.getElementById('iscsiinterfaceaddress' + interfaceid).required = false;
         document.getElementById('iscsiinterfaceaddress' + interfaceid).disabled = true;
 
-        document.getElementById('iscsiinterfaceport' + interfaceid).value = parseInt(interfacedetails[1]);
+        document.getElementById('iscsiinterfaceport' + interfaceid).value = parseInt(port);
         document.getElementById('iscsiinterfaceport' + interfaceid).required = false;
         document.getElementById('iscsiinterfaceport' + interfaceid).disabled = true;
-
     });
 
     if (!document.getElementById('iinterfacesconfigurationdiv').classList.contains("configloaded")) {
         document.getElementById('iinterfacesconfigurationdiv').classList.add("configloaded");
     }
 }
+
 
 function UpdateNFSExports(nfsexportjson) {
     document.getElementById('nfsexportsdiv').setAttribute('nfsexportcount', '0');
@@ -2594,7 +2606,16 @@ function targetaddoption(theselect, thevalue, selected, multiselect) {
     let newoption = document.createElement("option");
 
     newoption.value = thevalue;
-    newoption.text = thevalue;
+
+    if ( thevalue.substring(0,4) == "ALL:")
+    {
+      newoption.text = "ALL";
+    }
+    else
+    {
+      newoption.text = thevalue;
+    }
+
     if (selected) {
         newoption.setAttribute("bound", "1");
         newoption.selected = true;
@@ -3087,13 +3108,13 @@ function updateiscsitargets(iscsijson) {
     }
 
     const iscsitargets = Object.keys(iscsitargetlist);
-    const iscsibindingslist = iscsijson.bindings;
-    let iscsibindings;
+    const iscsiaclbindingslist = iscsijson.bindings;
+    let iscsiaclbindings;
 
-    if (iscsibindingslist != null) {
-        iscsibindings = Object.keys(iscsibindingslist);
+    if (iscsiaclbindingslist != null) {
+        iscsiaclbindings = Object.keys(iscsiaclbindingslist);
     } else {
-        iscsibindings = [];
+        iscsiaclbindings = [];
     }
     var lunid = 0;
 
@@ -3135,16 +3156,16 @@ function updateiscsitargets(iscsijson) {
 
     }
 
-    for (let thebinding = 0; thebinding < iscsibindings.length; thebinding++) {
-        var binding = iscsibindingslist[thebinding].binding.bindto;
+    for (let thebinding = 0; thebinding < iscsiaclbindings.length; thebinding++) {
+        var binding = iscsiaclbindingslist[thebinding].binding.bindto;
         var bindtocount = binding.length;
 
-        let targetid = iscsibindingslist[thebinding].binding.tid;
+        let targetid = iscsiaclbindingslist[thebinding].binding.tid;
         for (let bindto = 0; bindto < bindtocount; bindto++) {
             targetaddoption('iscsitargetinterfaces' + targetid, binding[bindto].address, true, true);
         }
 
-        var accountbinding = iscsibindingslist[thebinding].binding.accounts;
+        var accountbinding = iscsiaclbindingslist[thebinding].binding.accounts;
         var bindingaccountcount = accountbinding.length;
 
         for (let account = 0; account < bindingaccountcount; account++) {
@@ -3259,6 +3280,7 @@ function updateiscsiaccountlistselect(iscsijson) {
     }
 }
 
+
 function updateiscsiinterfacelistselect(iscsijson) {
     var updaterow = document.getElementById('iscsitargetsdiv').getAttribute('updatingid');
 
@@ -3269,24 +3291,41 @@ function updateiscsiinterfacelistselect(iscsijson) {
     var interfacecount = 0;
     var optionfound = 0;
     const iscsiinterfacelist = iscsijson.interfaces;
+    
+    if (!iscsiinterfacelist["ALL:0"]) {
+        iscsiinterfacelist["ALL:0"] = {
+            interface: {
+                address: "ALL:0"
+            }
+        };
+    }
+
     const iscsiinterfaces = Object.keys(iscsiinterfacelist);
+
     iscsiinterfaces.forEach(function(entry) {
 
-        optionfound = 0;
-        Array.from(document.querySelector("#iscsitargetinterfaces" + updaterow).options).forEach(function(option_element) {
+    optionfound = 0;
+    Array.from(document.querySelector("#iscsitargetinterfaces" + updaterow).options).forEach(function(option_element) {
             interfacecount++;
 
-            if (option_element.value == 'ALL') {
-                document.getElementById("iscsitargetinterfaces" + updaterow).remove(interfacecount - 1);
-            } else if (option_element.value == iscsiinterfacelist[entry].interface.address) {
+        if (option_element.value == iscsiinterfacelist[entry].interface.address)  {
                 optionfound = 1;
             }
         });
 
         if (optionfound == 0) {
             let newoption = document.createElement("option");
+
             newoption.value = iscsiinterfacelist[entry].interface.address;
-            newoption.text = iscsiinterfacelist[entry].interface.address;
+            if ( iscsiinterfacelist[entry].interface.address.substring(0,4) == "ALL:" )
+            {
+              newoption.text = "ALL"; 
+            }
+            else
+            {
+              newoption.text = iscsiinterfacelist[entry].interface.address;
+            }
+
             newoption.setAttribute("bound", "0");
             newoption.addEventListener("mousedown",
                 function(e) {
@@ -3303,7 +3342,8 @@ function updateiscsiinterfacelistselect(iscsijson) {
 
             document.getElementById("iscsitargetinterfaces" + updaterow).add(newoption);
         }
-    });
+      }
+    );
 
     interfacecount = 0;
     var selectidx = 0;
@@ -3326,12 +3366,27 @@ function updateiscsiinterfacelistselect(iscsijson) {
 
     if (interfacecount == 0) {
         let newoption = document.createElement("option");
-        newoption.value = "ALL";
+        newoption.value = "ALL:0";
         newoption.text = "ALL";
-        newoption.selected = true;
+        newoption.selected = false;
+        newoption.setAttribute("bound", "0");
+        newoption.addEventListener("mousedown",
+            function(e) {
+                e.preventDefault();
+
+                if (this.selected == true) {
+                    this.selected = false;
+                } else {
+                    this.selected = true;
+                }
+                enableiscsibuttons('iscsitarget');
+                return false;
+            }, false);
+
         document.getElementById("iscsitargetinterfaces" + updaterow).add(newoption);
     }
 }
+
 
 
 function completeiscsigetrequest(iscsijson) {
@@ -3613,10 +3668,8 @@ function saveiscsitargets() {
 
         for (let interface = 0; interface < interfaceselect.options.length; interface++) {
             if (interfaceselect.options[interface].selected) {
-                if (interfaceselect.options[interface].getAttribute("bound") == "0") {
                     iscsibindingsjson += bindtocomma + '{ "address": "' + interfaceselect.options[interface].value + '", "mode": "add" }';
                     bindtocomma = ',';
-                }
             } else if (interfaceselect.options[interface].getAttribute("bound") == "1") {
                 iscsibindingsjson += bindtocomma + '{ "address": "' + interfaceselect.options[interface].value + '", "mode": "delete" }';
                 bindtocomma = ',';

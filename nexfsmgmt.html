@@ -55,7 +55,7 @@
                 Nexustorage Nexfs Admin Console
             </div>
             <div id="headerreleaselabel" class="headerreleasetext">
-                Portal Release 1.5
+                Portal Release 1.6
             </div>
             <div id="headernexfsinfolabel" class="headernexfstext">
                 <table>
@@ -1506,7 +1506,7 @@
             </div>
         </div>
         <div id="showhelp" class="hidden" 
-            NFSClients="<b>Clients:</b><br><br>The NFS client who can access the export.<br>Can be a single host, netgroup, or IP networks, wildcards for client names are supported. Exports man page 5 documents valid formats as:<br><br>Single Host<br>&emsp;You may specify a host either by an abbreviated name recognized be the resolver, the fully qualified domain name, an IPv4 address, or an IPv6 address. IPv6 addresses must not be inside square brackets in /etc/exports lest they be confused with character-class wildcard matches.<br><br>Netgroups<br>&emsp;NIS netgroups may be given as @group. Only the host part of each netgroup members is consider in checking for membership. Empty host parts or those containing a single dash (-) are ignored.<br><br> Wildcards<br>&emsp;Machine names may contain the wildcard characters * and ?, or may contain character class lists within [square brackets]. This can be used to make the exports file more compact; for instance, *.cs.foo.edu matches all hosts in the domain cs.foo.edu. As these characters also match the dots in a domain name, the given pattern will also match all hosts within any subdomain of cs.foo.edu.<br><br>IP networks<br>&emsp;You can also export directories to all hosts on an IP (sub-) network simultaneously. This is done by specifying an IP address and netmask pair as address/netmask where the netmask can be specified in dotted-decimal format, or as a contiguous mask length. For example, either '/255.255.252.0' or '/22' appended to the network base IPv4 address results in identical subnetworks with 10 bits of host. IPv6 addresses must use a contiguous mask length and must not be inside square brackets to avoid confusion with character-class wildcards. Wildcard characters generally do not work on IP addresses, though they may work by accident when reverse DNS lookups fail."
+            NFSClients="<b>Clients:</b><br><br>The NFS client who can access the export.<br>Can be a single host, netgroup, or IP networks, wildcards for client names are supported. Exports man page 5 documents valid formats as:<br><br>Single Host<br>&emsp;You may specify a host either by an abbreviated name recognized by the resolver, the fully qualified domain name, an IPv4 address, or an IPv6 address. IPv6 addresses must not be inside square brackets in /etc/exports lest they be confused with character-class wildcard matches.<br><br>Netgroups<br>&emsp;NIS netgroups may be given as @group. Only the host part of each netgroup members is consider in checking for membership. Empty host parts or those containing a single dash (-) are ignored.<br><br> Wildcards<br>&emsp;Machine names may contain the wildcard characters * and ?, or may contain character class lists within [square brackets]. This can be used to make the exports file more compact; for instance, *.cs.foo.edu matches all hosts in the domain cs.foo.edu. As these characters also match the dots in a domain name, the given pattern will also match all hosts within any subdomain of cs.foo.edu.<br><br>IP networks<br>&emsp;You can also export directories to all hosts on an IP (sub-) network simultaneously. This is done by specifying an IP address and netmask pair as address/netmask where the netmask can be specified in dotted-decimal format, or as a contiguous mask length. For example, either '/255.255.252.0' or '/22' appended to the network base IPv4 address results in identical subnetworks with 10 bits of host. IPv6 addresses must use a contiguous mask length and must not be inside square brackets to avoid confusion with character-class wildcards. Wildcard characters generally do not work on IP addresses, though they may work by accident when reverse DNS lookups fail."
             NFSAccess="<b>Access:</b><br><br>If the export should be exported Read-Write or Read-Only" NFSMappings="<b>Mappings:</b><br><br><b>AnonymousUID</b><br><br>Explicitly set the uid of the anonymous account<br><br><b>AnonymousGID</b><br><br>Explicitly set the gid of the anonymous account<br><br><b>SquashMode</b><br><br><i>root_squash</i><br><br>Map requests from uid/gid 0 to the anonymous uid/gid. Note that this does not apply to any other uids or gids that might be equally sensitive, such as user bin or group staff<br><br><i>no_root_squash</i><br><br>Turn off root squashing<br><br><i>all_squash</i><br><br>Map all uids and gids to the anonymous user. Useful for NFS-exported public FTP directories, news spool directories, etc"
             NFSSecurity="<b>Security:</b><br><br>sys (Default)<br>&emsp;Basic Linux host system security (no cryptographic security)<br><br>krb5<br>&emsp;The export supports krb5 security  (authentication only)<br><br>krb5i<br>&emsp;The export supports krb5i security  (integrity protection)<br><br>krb5p<br>&emsp;The export supports krb5p security  (privacy protection)"
             NFSAdvanced="<b>Advanced:</b><br><br>Subtree Check<br>&emsp;Enables or disables subtree checking. The system must check a subdirectory of the filesystem exported, but when the whole filesystem is not export for each NFS request, the server must check not only that the accessed file is in the appropriate filesystem (which is easy) but also that it is in the exported tree (which is harder)<br><br>Secure Locks<br>&emsp;When not set the NFS server is not required to enforce authentication of locking requests. Normally the NFS server will require a lock request to hold a credential for a user who has read access to the file. Without this set those access checks will not be performed.<br><br>No wdelay<br>&emsp;When enabled performance can improve by allowing the NFS server to send multiple related write requests to Nexfs in a single operation, but performance can also be reduced if the NFS server receives small unrelated write requests.  Note: async must also be disabled on the export for this feature to activate<br><br>Async<br>&emsp;This option allows the NFS server to reply to requests before change have been committed to storage. Using this option may improve performance, but can cause data to be lost or corrupted if the server is uncleanly restarted or crashed<br><br>Export Enabled<br>&emsp;Make the export available for clients to mount"
@@ -1527,6 +1527,18 @@
             EDITUSERAUTHENICATIONMETHOD="<b>Authenication Method:</b><br><br>The method to be used when authenication requests from the account"
             EDITUSERCONTENTROLES="<b>Content Roles:</b><br><br>Default Roles to be assigned when the account is used with the S3 Protocol, bucket and object level policies when configured, override default content roles"
             EDITUSERMANAGEMENTROLES="<b>Management Roles:</b><br><br>The roles the account assumes when used to access the webconsole and management API"
+            iscsitargetid="<b>Target ID:</b><br><br>An iSCSI Target ID is a unique identifier used to access storage devices over a network in an iSCSI environment. The Target ID is auto assigned by Nexfs when the target is first created"
+            iSCSItargetinterface="<b>Target Interfaces:</b><br><br>Which interfaces (portals) the target will accept connections over, Select <b>ALL</b> to make the target available over all system interfaces"
+            iSCSItargetaccount="<b>Inbound Accounts:</b><br><br>If any inbound accounts are selected, iSCSI initators must provide the corresponding login/password during the login phase of the iSCSI connection sequence. if no accounts are selected, there is no security" 
+            iSCSItargetoutboundaccount="<b>Outbound Account:</b><br><br>If an outbound account is selected, the iSCSI target (Nexfs) must provide the corresponding login/password during the login phase of the iSCSI connection sequence, if no accounts is selected Nexfs communicates to the iSCSI initator (client) without providing a login/password"
+            iscsitargetheaderdigest="<b>Header Digest:</b><br><br>An iSCSI Header Digest is a checksum that ensures data integrity by verifying the correctness of the iSCSI header during transmission"
+            iscsitargetdatadigest="<b>Data Digest:</b><br><br>An iSCSI Data Digest is a checksum used to verify the integrity of data during iSCSI transfers, ensuring it arrives without corruption"
+            iSCSIlun="<b>Lun ID X:</b><br><br>An <b>iSCSI LUN ID</b> is a unique identifier for a specific storage volume (Logical Unit) on an iSCSI target. The Lun ID is auto assigned by Nexfs when the Lun is first created"
+            iSCSIlunpath="<b>Lun PATH:</b><br><br>The Path to the file within Nexfs which contains the Lun Data"
+            iSCSIsn="<b>Lun SN:</b><br><br>An <b>iSCSI LUN SN<b> is the serial number used to uniquely identify a specific Logical Unit (LUN) on an iSCSI target"
+            iSCSIMode="<b>Lun Mode:</b><br><br>A <b>iSCSI LUN</b> can be <b>ONLINE</b> or <b>OFFLINE<b>. Only <b>OFFLINE LUNs can be deleted</b>, and OFFLINE LUNs will have the DELETE option listed as a mode"
+            iSCSIUserName="<b>User Name:</b>The iSCSI Account login/user name"
+            iSCSIPassword="<b>Password:</b>The iSCSI Account login/user Password"
             >
         </div>
 
@@ -1985,6 +1997,18 @@
                         </tr>
                     </table>
                 </div><br>
+                <br>
+                <p><b>To Configure iSCSI Targets: </b></p>
+                <ul>
+                    <li><b>Add Target</b>: Use this button to create a new iSCSI target, which can have its own LUNs and configuration.</li>
+                    <li><b>Add LUN</b>: Click this button to add a new Logical Unit (LUN) under the selected Target ID. Each LUN represents a storage volume available over iSCSI.</li>
+                    <li><b>Save</b>: After making changes, click "Save" to apply and store the iSCSI target configurations. <b>Note:</b> If a target has no LUNs when saved, it will be automatically deleted.</li>
+                    <li><b>Reload</b>: Click this to refresh the page and discard any unsaved changes.</li>
+                    <li><b>Field Description</b>: Click on a field label for a short descirption.</li>
+                </ul>
+                <p>Ensure to configure the Interfaces, Inbound/Outbound Accounts, and LUN paths before saving. Targets without configured LUNs will automatically be deleted.</p>
+                <br><br>
+
             </div>
 
             <div id="iaccountsconfigurationdiv" class="subpaneldiv configurationtabdiv">
@@ -2022,7 +2046,7 @@
                 &nbsp;<br><br>
                 <div class="paneltitle">iSCSI Interfaces Configuration</div>
 
-                <div class="iscsiinterfacesdiv" id="iscsiinterfacesdiv" iscsiinterfacecount="0">
+                <div class="iscsiinterfacesdiv" id="iscsiinterfacesdiv" iscsiinterfacebindingscount="0">
 
                 </div>
                 <div style="line-height: 1.5;">
