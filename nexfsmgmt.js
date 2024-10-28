@@ -22,6 +22,7 @@ nexfsmgmt.js v1.5  www.nexustorage.com
 
 var LastHttpRequest = {};
 LastHttpRequest.active = 0;
+let DEBUG = false;
 
 function hidediv(thediv) {
     document.getElementById(thediv).classList.remove("visible");
@@ -1103,9 +1104,7 @@ function iamaccountadd() {
     document.getElementById('iamedituserdiv').classList.remove('hidden');
     resetiameditfieldstatus();
     setiameditfieldmode(false);
-    if (document.getElementById("iammgmtrolepermissions").getAttribute('ListManagementRoles') == '1' || document.getElementById("iamcontentrolepermissions").getAttribute('ListContentRoles') == '1' ) {
-        getconfig('ListRoles');
-    }
+    getconfig('ListRoles');
 }
 
 
@@ -1128,8 +1127,8 @@ function iaminsertnewaccount(tablerow, userid, username, enabled) {
     var userenabledcell = row.insertCell(cellidx);
     cellidx++;
 
-    useridcell.innerHTML = userid;
-    usernamecell.innerHTML = username;
+    useridcell.innerHTML = decodeURIComponent(userid);
+    usernamecell.innerHTML = decodeURIComponent(username);
 
     if (enabled == 1) {
         userenabledcell.innerHTML = '<input type="checkbox" checked disabled>';
@@ -1811,7 +1810,8 @@ function UpdateSystemStatusErrorLogs(newlogs) {
     document.getElementById('systemststauslogerrors').innerHTML = '';
 
     for (const logmsg of errorlogs) {
-        document.getElementById('systemststauslogerrors').innerHTML += logmsg + "<br>";
+        let sanitizedLogmsg = logmsg.replace(/</g, '[').replace(/>/g, ']');
+        document.getElementById('systemststauslogerrors').innerHTML += sanitizedLogmsg + "<br>";
     }
 }
 
@@ -2944,8 +2944,8 @@ function completeiamgetmgmtgetuserrequest(response) {
     let User = GetUserResult.getElementsByTagName("User")[0];
     /* let Roles = User.getElementsByTagName("Roles")[0]; */
 
-    document.getElementById('iamedituserid').value = User.getElementsByTagName('UserId')[0].childNodes[0].nodeValue;
-    document.getElementById('orguserid').value = User.getElementsByTagName('UserId')[0].childNodes[0].nodeValue;
+    document.getElementById('iamedituserid').value = decodeURIComponent(User.getElementsByTagName('UserId')[0].childNodes[0].nodeValue);
+    document.getElementById('orguserid').value = decodeURIComponent(User.getElementsByTagName('UserId')[0].childNodes[0].nodeValue);
 
     if (User.getElementsByTagName('UserEnabled')[0].childNodes[0].nodeValue == '1') {
         document.getElementById('iamedituserenabled').checked = true;
@@ -2953,7 +2953,7 @@ function completeiamgetmgmtgetuserrequest(response) {
         document.getElementById('iamedituserenabled').checked = false;
     }
 
-    document.getElementById('iameditusername').value = User.getElementsByTagName('UserName')[0].childNodes[0].nodeValue;
+    document.getElementById('iameditusername').value = decodeURIComponent(User.getElementsByTagName('UserName')[0].childNodes[0].nodeValue);
 
     if (User.getElementsByTagName('UserPOSIXUID')[0].childNodes.length > 0) {
         document.getElementById('iamedituserposixuid').value = User.getElementsByTagName('UserPOSIXUID')[0].childNodes[0].nodeValue;
@@ -2964,15 +2964,15 @@ function completeiamgetmgmtgetuserrequest(response) {
     }
 
     if (User.getElementsByTagName('UserEmail')[0].childNodes.length > 0) {
-        document.getElementById('iamedituseremail').value = User.getElementsByTagName('UserEmail')[0].childNodes[0].nodeValue;
+        document.getElementById('iamedituseremail').value = decodeURIComponent(User.getElementsByTagName('UserEmail')[0].childNodes[0].nodeValue);
     }
 
     if (User.getElementsByTagName('UserDescription1')[0].childNodes.length > 0) {
-        document.getElementById('iamedituserdescription1').value = User.getElementsByTagName('UserDescription1')[0].childNodes[0].nodeValue;
+        document.getElementById('iamedituserdescription1').value = decodeURIComponent(User.getElementsByTagName('UserDescription1')[0].childNodes[0].nodeValue);
     }
 
     if (User.getElementsByTagName('UserDescription2')[0].childNodes.length > 0) {
-        document.getElementById('iamedituserdescription2').value = User.getElementsByTagName('UserDescription2')[0].childNodes[0].nodeValue;
+        document.getElementById('iamedituserdescription2').value = decodeURIComponent(User.getElementsByTagName('UserDescription2')[0].childNodes[0].nodeValue);
     }
     document.getElementById('iamedituserauthmethod').value = User.getElementsByTagName('AuthenicationMethod')[0].childNodes[0].nodeValue;
 
@@ -3494,7 +3494,6 @@ function encodejson(jsonstr) {
 function createrequesttoken(reqinfo) {
     const region = "nexfs";
     const service = "nexfsconsoleapi";
-    const debug = 0;
     let login;
     let password;
 
@@ -3534,7 +3533,7 @@ function createrequesttoken(reqinfo) {
 
     let authorization_header = 'AWS4-HMAC-SHA256 ' + 'Credential=' + login + '/' + credential_scope + ', ' + 'SignedHeaders=' + signed_headers + ', ' + 'Signature=' + signature;
 
-    if (debug == 1) {
+    if (DEBUG == true) {
         console.log('Request Parameters: ' + reqinfo.request_parameters);
         console.log('Canonical Request: ' + canonical_request);
         console.log('Aws4 signing secret: ' + password);
@@ -4093,7 +4092,7 @@ function getlicensedetails() {
 function sendattachuserrole(UserId, role, roletype) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RoleName=' + role + '&RoleType=' + roletype + '&UserId=' + UserId;
+    var reqparms = '&RoleName=' + encodejson(role) + '&RoleType=' + roletype + '&UserId=' + encodejson(UserId);
     if (createHttpRequest(reqinfo, 'AttachUserRole', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4101,7 +4100,7 @@ function sendattachuserrole(UserId, role, roletype) {
 function senddetachuserrole(UserId, role, roletype) {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&RoleName=' + role + '&RoleType=' + roletype + '&UserId=' + UserId;
+    var reqparms = '&RoleName=' + encodejson(role) + '&RoleType=' + roletype + '&UserId=' + encodejson(UserId);
     if (createHttpRequest(reqinfo, 'DetachUserRole', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4109,7 +4108,7 @@ function senddetachuserrole(UserId, role, roletype) {
 function senddeleteuserrequest(UserId) {
     const reqinfo = {}; 
     var HttpRequest = new XMLHttpRequest();
-    var reqparms = '&UserId=' + UserId;
+    var reqparms = '&UserId=' + encodejson(UserId);
     if (createHttpRequest(reqinfo, 'DeleteUser', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
@@ -4125,37 +4124,26 @@ function sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserCo
         reqparms += '&AuthMethod=' + UserAuthMethod;
     }
 
-    if (UserDescription1 != null || UserDescription2 != null) {
-        reqparms += '&Description={ ';
-        if (UserDescription1 != null) {
-            reqparms += '"UserDescription1": "' + UserDescription1 + '"';
-        }
-
-        if (UserDescription1 != null && UserDescription2 != null) {
-            reqparms += ',';
-        }
-
-        if (UserDescription2 != null) {
-            reqparms += '"UserDescription2": "' + UserDescription2 + '"';
-        }
-
-        reqparms += '}';
+    if ( UserDescription1 != null || UserDescription2 != null )
+    {
+      let userdescriptions = '{ "UserDescription1": "' + UserDescription1 + '","UserDescription2": "' + UserDescription2 + '" }';
+      reqparms += '&Description='+encodejson(userdescriptions); 
     }
 
     if (UserEmail != null) {
-        reqparms += '&Email=' + UserEmail;
+        reqparms += '&Email=' + encodejson(UserEmail);
     }
 
     if (UserContentSecret != null) {
-        reqparms += '&NewContentSecret=' + UserContentSecret;
+        reqparms += '&NewContentSecret=' + encodejson(UserContentSecret);
     }
 
     if (UserSecretHash != null) {
-        reqparms += '&NewSecretHash=' + UserSecretHash;
+        reqparms += '&NewSecretHash=' + encodejson(UserSecretHash);
     }
 
     if (UserId != null) {
-        reqparms += '&NewUserId=' + UserId;
+        reqparms += '&NewUserId=' + encodejson(UserId);
     }
 
     if (GID != null) {
@@ -4166,10 +4154,10 @@ function sendsaveuserrequest(OrgUserId, UserId, UserName, UserSecretHash, UserCo
         reqparms += '&POSIXUID=' + UID;
     }
 
-    reqparms += '&UserId=' + OrgUserId;
+    reqparms += '&UserId=' + encodejson(OrgUserId);
 
     if (UserName != null) {
-        reqparms += '&UserName=' + UserName;
+        reqparms += '&UserName=' + encodejson(UserName);
     }
 
     if (createHttpRequest(reqinfo, action, reqparms, 0, HttpRequest) == null) return;
@@ -4185,7 +4173,7 @@ function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserContentSecr
     var reqparms = "";
 
     if (Roles != null) {
-        reqparms += '&AssumeRolePolicyDocument=' + Roles;
+        reqparms += '&AssumeRolePolicyDocument=' + encodejson(Roles);
     }
 
     if (UserAuthMethod != null) {
@@ -4193,19 +4181,20 @@ function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserContentSecr
     }
 
     if (UserDescription1 != null || UserDescription2 != null) {
-        reqparms += '&Description={ "UserDescription1": "' + UserDescription1 + '","UserDescription2": "' + UserDescription2 + '" }';
+        let userdescriptions = '{ "UserDescription1": "' + UserDescription1 + '","UserDescription2": "' + UserDescription2 + '" }';
+        reqparms += '&Description='+encodejson(userdescriptions); 
     }
 
     if (UserEmail != null) {
-        reqparms += '&Email=' + UserEmail;
+        reqparms += '&Email=' + encodejson(UserEmail);
     }
 
     if (UserContentSecret != null) {
-        reqparms += '&NewContentSecret=' + UserContentSecret;
+        reqparms += '&NewContentSecret=' + encodejson(UserContentSecret);
     }
 
     if (UserSecretHash != null) {
-        reqparms += '&NewSecretHash=' + UserSecretHash;
+        reqparms += '&NewSecretHash=' + encodejson(UserSecretHash);
     }
 
     if (GID != null) {
@@ -4217,7 +4206,7 @@ function sendcreateuserrequest(UserId, UserName, UserSecretHash, UserContentSecr
         reqparms += '&POSIXUID=' + UID;
     }
 
-    reqparms += '&UserId=' + UserId + '&UserName=' + UserName;
+    reqparms += '&UserId=' + encodejson(UserId) + '&UserName=' + encodejson(UserName);
 
     if (createHttpRequest(reqinfo, action, reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
@@ -4236,7 +4225,7 @@ function sendsaverolerequest(RoleName, Statement, Version, Create, RoleId, Enabl
     if (RoleId != null) {
         reqparms += '&RoleId=' + RoleId;
     }
-    reqparms += '&RoleName=' + RoleName + '&RoleType=';
+    reqparms += '&RoleName=' + encodejson(RoleName) + '&RoleType=';
 
     if ( roletype == 'iammgmt' ) {
         reqparms+='iam';
@@ -4472,6 +4461,11 @@ function getsessionpermissions() {
     var reqparms = '&RequestJSON=' + encodejson(reqjson);
     if (createHttpRequest(reqinfo, 'GetSessionPermissions', reqparms, 0, HttpRequest, true) == null) return;
     HttpRequest.send();
+}
+
+function toggledebug()
+{
+    DEBUG=!DEBUG;
 }
 
 function getsessiontoken() {

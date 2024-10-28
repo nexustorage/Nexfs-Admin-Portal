@@ -1206,7 +1206,7 @@ input:checked+.slider:before {
     top: 10px;
     position: relative;
     overflow: auto;
-    width: 900px;
+    width: auto;
     min-height: 200px;
     height: auto;
 }

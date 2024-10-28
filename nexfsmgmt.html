@@ -9,7 +9,10 @@
       req.open('HEAD', '/nexfsconsole', false);
       req.send(null);
 
-      document.getElementById("headernexfsid").innerHTML = "Nexfs ID: " + req.getResponseHeader("nexfs-id") + "&nbsp;&nbsp; Region: " + req.getResponseHeader("nexfs-region");
+      document.getElementById("headernexfsid").innerHTML = 'Nexfs I<span id="debug-toggle" style="cursor: pointer;">D</span>: ' + req.getResponseHeader("nexfs-id") + "&nbsp;&nbsp; Region: " + req.getResponseHeader("nexfs-region");
+
+      document.getElementById("debug-toggle").addEventListener("click", toggledebug);
+
     }
 </script>
 
