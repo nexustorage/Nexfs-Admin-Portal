@@ -1,8 +1,8 @@
 /*
 nexfsmgmt.js v1.5  www.nexustorage.com
 
-(c) 2022 2023 2024 by Nexustorage Limited. All rights reserved.
-(c) 2022 2023 2024 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
+(c) 2022 2023 2024 2025 by Nexustorage Limited. All rights reserved.
+(c) 2022 2023 2024 2025 by Glen Olsen email: glen@glenolsen.net. All rights reserved.
 // This file is part of Nexustorage Nexfs Storage stack
 //
 // This program is free software: you can redistribute it and/or modify
@@ -472,7 +472,7 @@ function iscsitargetlunadd(targetid, lunid) {
         '            <td class="iscsiaccountuserlabel"><input class="iscsivalidate" id="iscsilunpathtargetXlunY" style="width: 300px;" required ONCHANGE></td>' +
         '            <td class="lunpathimg" onclick="selectfile(@iscsilunpathtargetXlunY@)"><img src="openfolderblue.png"></td>' +
         '            <td><div class="iscsilabel" onclick="openshowhelp(@iSCSIsn@)">SN</div></td>' +
-        '            <td class="iscsiaccountuserlabel"><input class="iscsivalidate" id="iscsilunsntargetXlunY" style="width: 215px;" placeholder="Auto Generate" ONCHANGE></td>' +
+        '            <td class="iscsiaccountuserlabel"><input class="iscsivalidate" id="iscsilunsntargetXlunY" placeholder="Auto Generate" ONCHANGE></td>' +
         '            <td><div class="iscsilabel" onclick="openshowhelp(@iSCSIMode@)">Mode</div></td>' +
         '            <td class="iscsiinterfaceportlabel"><select id="iscsilunmodetargetXlunY" ONCHANGE><option value="online">Online</option><option value="offline">Offline</option><option value="delete">Delete</option></select></td>' +
         '          </tr>' +
@@ -1203,7 +1203,7 @@ function nfsexportadd() {
         '            <input type="checkbox" id="nfsexportadvancedrootexportX" name="nfsexportrootexport" value="rootexport" onchange="togglerootexportcheckboxes(this); enablenfsexportbuttons()" enablenfsexportbuttons() ">Root Export' +
         '            <input type="checkbox" id="nfsexportadvancedenabledX" name="nfsexportX" value="exportenabled" checked onchange="enablenfsexportbuttons()">Export' +
         '            Enabled' +
-        '            <div name="nfsexportX" class="button" style="left: 580px;position: absolute;top: 3px;"' +
+        '            <div name="nfsexportX" class="button" style="left: 600px;position: absolute;top: 3px;"' +
         '                onclick="nfsexportdelete(X);">' +
         '                <center>Delete</center>' +
         '            </div>' +
@@ -1565,6 +1565,12 @@ function changetopmenuselected(e, section) {
             document.getElementById('iscsitargetsdiv').setAttribute('updatingid', '0');
             getconfig('GetISCSIConf');
         }
+    } else if (e.currentTarget.name == 'iconfiguration') {
+        if (!document.getElementById('iconfigurationdiv').classList.contains("configloaded")) {
+            document.getElementById('iscsitargetsdiv').setAttribute('updating', 'iconfiguration');
+            document.getElementById('iscsitargetsdiv').setAttribute('updatingid', '0');
+            getconfig('GetISCSIConf');
+        }
     }
 }
 
@@ -1778,6 +1784,11 @@ function AutoUpdateSystemStatus() {
     } else {
         AddUpdateSystemStatusTimer();
     }
+}
+
+function UpdateISCSIActiveInformation(IscsiInformation) {
+    const formattedHtml = IscsiInformation.replace(/:::n/g, '<br>').replace(/:::t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+    document.getElementById('iscsiinformation').innerHTML = formattedHtml;
 }
 
 function DisplayLicenseDetails(currentlicensedetails) {
@@ -2288,7 +2299,7 @@ function ActivateSessionPermissions(sessionpermissions) {
     const optionconfenableforms = ['storageindexconfigurationdiv', 'storagetier1configurationdiv', 'storagetier2configurationdiv', 'storagetier3configurationdiv',
         'storagescheduledmigrationsconfigurationdiv'
     ];
-    const optionids = ['systemstatus', 'nexfsconfiguration', 'nfs', 'iscsi', 'license', 'servicemanagement', 'pausenexfs', 'enableiscsi', 'enablenfs', 'managenfs', 'iam', 'certs'];
+    const optionids = ['systemstatus', 'nexfsconfiguration', 'nfs', 'iscsi', 'license', 'servicemanagement', 'pausenexfs', 'enablemgmtapiserver', 'enablecontentserver', 'enableiscsi', 'enablenfs', 'managenfs', 'iam', 'certs'];
 
 
     for (let optionform of optiondisableforms) {
@@ -2366,6 +2377,14 @@ function ActivateSessionPermissions(sessionpermissions) {
         } else if (action == 'nexfs:GetContentRoles') {
             document.getElementById('iam').classList.remove("optiondisabled");
             getconfig('ListAllContentActions');
+        } else if (action == 'nexfs:ManageContentServer') {
+            document.getElementById('servicemanagement').classList.remove("optiondisabled");
+            document.getElementById('CONTENTWEBSERVERENABLED').disabled = false;
+            document.getElementById('enablecontentserver').classList.remove("optiondisabled");
+        } else if (action == 'nexfs:ManageManagementServer') {
+            document.getElementById('servicemanagement').classList.remove("optiondisabled");
+            document.getElementById('MGMTWEBSERVERENABLED').disabled = false;
+            document.getElementById('enablemgmtapiserver').classList.remove("optiondisabled");
         } else if (action == 'nexfs:PauseServer') {
             document.getElementById('servicemanagement').classList.remove("optiondisabled");
             document.getElementById('NEXFSPAUSED').disabled = false;
@@ -2501,6 +2520,8 @@ function RequestComplete() {
             } else if (requesturl.includes('Action=GetSystemStatus')) {
                 UpdateSystemStatus(JSON.parse(RequestStatus.responseText));
                 geterrorlogs();
+            } else if (requesturl.includes('Action=GetActiveISCSI')) {
+                UpdateISCSIActiveInformation(RequestStatus.responseText);
             } else if (requesturl.includes('Action=GetErrorLog')) {
                 UpdateSystemStatusErrorLogs(JSON.parse(RequestStatus.responseText));
                 AddUpdateSystemStatusTimer();
@@ -3290,8 +3311,13 @@ function updateiscsiinterfacelistselect(iscsijson) {
 
     var interfacecount = 0;
     var optionfound = 0;
-    const iscsiinterfacelist = iscsijson.interfaces;
+    var iscsiinterfacelist = iscsijson.interfaces;
     
+    if (!iscsiinterfacelist) {
+        iscsiinterfacelist = {};
+        iscsijson.interfaces = iscsiinterfacelist; 
+    }
+
     if (!iscsiinterfacelist["ALL:0"]) {
         iscsiinterfacelist["ALL:0"] = {
             interface: {
@@ -3680,11 +3706,10 @@ function saveiscsitargets() {
         var accountcomma = '';
 
         let accounttargetselect = document.getElementById('iscsitargetaccounts' + iscsitargetid);
-        let accountinboundselect = document.getElementById('iscsiinboundaccounts' + iscsitargetid);
 
         for (let account = 0; account < accounttargetselect.options.length; account++) {
             if (accounttargetselect.options[account].selected) {
-                if (accounttargetselect.options[account].getAttribute("bound") == "0" && accounttargetselect.options[account].value != 'n0n3xfs0utb0undacc0unt') {
+                if ((!accounttargetselect.options[account].hasAttribute("bound") || accounttargetselect.options[account].getAttribute("bound")) == "0" && accounttargetselect.options[account].value != 'n0n3xfs0utb0undacc0unt') {
                     iscsibindingsjson += accountcomma + '{ "username": "' + accounttargetselect.options[account].value + '", "mode": "addtarget" }';
                     accountcomma = ',';
                 }
@@ -3692,18 +3717,20 @@ function saveiscsitargets() {
                 iscsibindingsjson += accountcomma + '{ "username": "' + accounttargetselect.options[account].value + '", "mode": "deletetarget" }';
                 accountcomma = ',';
             }
+        }
 
-            if (account > 0) {
-                if (accountinboundselect.options[account - 1].selected) {
-                    if (accountinboundselect.options[account - 1].getAttribute("bound") == "0") {
-                        iscsibindingsjson += accountcomma + '{ "username": "' + accountinboundselect.options[account - 1].value + '", "mode": "add" }';
+        let accountinboundselect = document.getElementById('iscsiinboundaccounts' + iscsitargetid);
+
+        for (let account = 0; account < accountinboundselect.options.length; account++) {
+                if (accountinboundselect.options[account].selected) {
+                    if (!accountinboundselect.options[account].hasAttribute("bound") || accountinboundselect.options[account].getAttribute("bound") == "0") {
+                        iscsibindingsjson += accountcomma + '{ "username": "' + accountinboundselect.options[account].value + '", "mode": "add" }';
                         accountcomma = ',';
                     }
-                } else if (accountinboundselect.options[account - 1].getAttribute("bound") == "1") {
-                    iscsibindingsjson += accountcomma + '{ "username": "' + accountinboundselect.options[account - 1].value + '", "mode": "delete" }';
+                } else if (accountinboundselect.options[account].getAttribute("bound") == "1") {
+                    iscsibindingsjson += accountcomma + '{ "username": "' + accountinboundselect.options[account].value + '", "mode": "delete" }';
                     accountcomma = ',';
                 }
-            }
         }
 
 
@@ -4065,6 +4092,16 @@ function getsystemstatus() {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
     if (createHttpRequest(reqinfo, 'GetSystemStatus', '', 0, HttpRequest) == null) return;
+    HttpRequest.send();
+}
+
+function retreiveiscsiinformation() {
+    const reqinfo = {};
+    var HttpRequest = new XMLHttpRequest();
+    var Action = document.getElementById("iscsiinformationrequested").value;
+    var Target = document.getElementById("iscsiinformationtarget").value;
+    var reqparms = '&Retrieve=' +  Action + '&Target=' + Target;
+    if (createHttpRequest(reqinfo, 'GetActiveISCSI', reqparms, 0, HttpRequest) == null) return;
     HttpRequest.send();
 }
 
@@ -4457,7 +4494,7 @@ function sendupdatesecretrequest(oldhash, newhash) {
 function getsessionpermissions() {
     const reqinfo = {};
     var HttpRequest = new XMLHttpRequest();
-    var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListManagementRoles", "iam:DeleteManagementRoles", "nexfs:GetContentRoles","nexfs:ListContentRoles", "nexfs:UpdateContentRoles", "nexfs:DeleteManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateOtherUserContentSecret","iam:UpdateUsers", "iam:UpdateOwnSecret", "nexfs:ManageCertificate" ]}';
+    var reqjson = '{"Permissions": [ "nexfs:PauseServer", "nexfs:GetSystemStatus", "nexfs:GetConfiguration","nexfs:UpdateConfiguration","nfs:GetSubSystem","nfs:GetConfiguration", "nfs:ManageSubSystem","nfs:GetConfiguration","iscsi:GetSubSystem","iscsi:ManageSubSystem","iscsi:GetConfiguration","iscsi:UpdateConfiguration","nexfs:GetLicenseDetails","nexfs:UpdateLicense","nexfs:CreateFiles","nexfs:CreateDirectories","nexfs:ListFiles","nexfs:ListDirectories","iam:GetManagementRoles","iam:UpdateManagementRoles", "iam:ListManagementRoles", "iam:DeleteManagementRoles", "nexfs:GetContentRoles","nexfs:ListContentRoles", "nexfs:UpdateContentRoles", "nexfs:DeleteManagementRoles", "iam:ListUsers", "iam:GetUser", "iam:UpdateOtherUserSecret","iam:UpdateOtherUserContentSecret","iam:UpdateUsers", "iam:UpdateOwnSecret", "nexfs:ManageCertificate", "nexfs:ManageManagementServer", "nexfs:ManageContentServer" ]}';
     var reqparms = '&RequestJSON=' + encodejson(reqjson);
     if (createHttpRequest(reqinfo, 'GetSessionPermissions', reqparms, 0, HttpRequest, true) == null) return;
     HttpRequest.send();
@@ -4535,4 +4572,14 @@ function showupdatelicensediv() {
 function showcertadddiv() {
     const reqinfo = {};
     document.getElementById('addcertdiv').className = 'paneldiv';
+}
+
+function toggleIscsiInformationTarget() {
+    var select = document.getElementById("iscsiinformationrequested");
+    var targetInput = document.getElementById("iscsiinformationtarget");
+    if (select.value === "showtarget" || select.value === "showtargetsession") {
+        targetInput.hidden = false;
+    } else {
+        targetInput.hidden = true;
+    }
 }

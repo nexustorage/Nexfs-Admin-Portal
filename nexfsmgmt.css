@@ -913,7 +913,7 @@ main {
     position: absolute;
     cursor: pointer;
     top: 0;
-    left: 180px;
+    left: 220px;
     right: 0;
     bottom: 0;
     background-color: #ccc;
@@ -1154,6 +1154,11 @@ input:checked+.slider:before {
     position: absolute;
 }
 
+.iscsiinformation {
+    position: relative;
+    left: 50px;
+}
+
 .iscsilunidlabel {
     color: #203864;
     font-family: Helvetica;
@@ -1231,13 +1236,13 @@ input:checked+.slider:before {
     top: 10px;
     position: relative;
     overflow: auto;
-    width: 850px;
+    width: auto;
     min-height: 200px;
     max-height: 500px;
 }
 
 .iscsiaccountuserlabel input {
-    width: 150px;
+    width: 230px;
 }
 
 .iscsiaccountuserlabel input:invalid {

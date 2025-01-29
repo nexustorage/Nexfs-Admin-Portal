@@ -58,7 +58,7 @@
                 Nexustorage Nexfs Admin Console
             </div>
             <div id="headerreleaselabel" class="headerreleasetext">
-                Portal Release 1.6
+                Portal Release 1.7
             </div>
             <div id="headernexfsinfolabel" class="headernexfstext">
                 <table>
@@ -109,34 +109,36 @@
         <div id="login" class="login">
             <div id="logindiv" class="logindiv">
                 <center>
-                    <table>
-                        <tr>
-                            <td>Login Name:</td>
-                            <td><input type="text" size="30px" name="username" id="username" tabindex="1" ></td>
-                        </tr>
-                        <tr>
-                            <td>Password:</td>
-                            <td><input type="password" size="30px" name="password" id="password"  tabindex="2"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <center><input type="submit" value="Login" id="loginbutton" onclick="getsessiontoken(this); return false;" tabindex="3"></center>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div id="loginfailed" class="loginfailed">Login Failed</div>
-                            </td>
-                            <td>
-                                <div id=showloginfailedreason class="showloginfailed"><input type="button" size="30px" value="show reason" id="loginfailedbutton" onclick="showloginfailedreason(this)"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div id="loginfailedreason" class="loginfailedreason"></div>
-                            </td>
-                        </tr>
-                    </table>
+                    <form autocomplete="off">
+                        <table>
+                            <tr>
+                                <td>Login Name:</td>
+                                <td><input type="text" size="30px" id="username" tabindex="1" autocomplete="off"></td>
+                            </tr>
+                            <tr>
+                                <td>Password:</td>
+                                <td><input type="password" size="30px" id="password" tabindex="2" autocomplete="off"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <center><input type="submit" value="Login" id="loginbutton" onclick="getsessiontoken(this); return false;" tabindex="3"></center>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="loginfailed" class="loginfailed">Login Failed</div>
+                                </td>
+                                <td>
+                                    <div id=showloginfailedreason class="showloginfailed"><input type="button" size="30px" value="show reason" id="loginfailedbutton" onclick="showloginfailedreason(this)"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <div id="loginfailedreason" class="loginfailedreason"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
                 </center>
             </div>
         </div>
@@ -667,6 +669,16 @@
                 oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
                 class="slider round"></span></label>
                     </div>
+                    <div id="enablecontentserver"><label class="switchlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERENABLED',this)">Enable Content (s3) Server</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="CONTENTWEBSERVERENABLED"
+                oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
+                class="slider round"></span></label>
+                    </div>
+                    <div id="enablemgmtapiserver"><label class="switchlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERENABLED',this)">Enable Mgmt/Api Server</label>
+                        <label class="switch"><input type="checkbox" class="configinput" id="MGMTWEBSERVERENABLED"
+                oninput="validateconfigform('storageservicemanagementconfigurationdiv')"><span
+                class="slider round"></span></label>
+                    </div>
                     <div id="enablenfs"><label class="switchlabel" onclick="showconfigurationhelp(event, 'NFSENABLED',this)">NFS
               Export Mgmt</label>
                         <label class="switch"><input type="checkbox" class="configinput" id="NFSENABLED"
@@ -787,6 +799,10 @@
                     <br>
                     <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETEMAXTHREADS',this)">Background
               Deletion Threads*</label><input type="number" validate="true" class="configinput" id="DELETEMAXTHREADS" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required>
+                    </div>
+                    <br>
+                    <div><label class="configlabel" onclick="showconfigurationhelp(event, 'DELETIONINTERVAL',this)">Background
+              Deletion Interval</label><input type="number" validate="true" class="configinput" id="DELETIONINTERVAL" oninput="validateconfigform('storagedeletionsandtruncationsconfigurationdiv')" required>
                     </div>
                     <br>
                     <br>
@@ -1288,18 +1304,6 @@
                 </div>
                 <br>
                 <div>
-                    <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERENABLED',this)">API / MgmtWeb Server</label>
-                    <table>
-                        <tr>
-                            <td class="configinput" id="MGMTWEBSERVERENABLED">
-                                <input class="firstradio" type="radio" name="MGMTWEBSERVERENABLED" id="MGMTWEBSERVERENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
-                                <input type="radio" name="MGMTWEBSERVERENABLED" id="MGMTWEBSERVERENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <br>
-                <div>
                     <label class="configlabel" onclick="showconfigurationhelp(event, 'MGMTWEBSERVERHTTPSENABLED',this)">MgmtWeb over HTTPS</label>
                     <table>
                         <tr>
@@ -1366,18 +1370,6 @@
 
                 <br>
                 <div>
-                    <label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERENABLED',this)">Content Server</label>
-                    <table>
-                        <tr>
-                            <td class="configinput" id="CONTENTWEBSERVERENABLED">
-                                <input class="firstradio" type="radio" name="CONTENTWEBSERVERENABLED" id="CONTENTWEBSERVERENABLED0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
-                                <input type="radio" name="CONTENTWEBSERVERENABLED" id="CONTENTWEBSERVERENABLED1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <br>
-                <div>
                     <label class="configlabel" onclick="showconfigurationhelp(event, 'CONTENTWEBSERVERHTTPSENABLED',this)">Content Server over HTTPS</label>
                     <table>
                         <tr>
@@ -1426,6 +1418,18 @@
                 </div>
                 <br>
                 <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'S3ABORTUPLOADONCREATE',this)">CS Abort Upload on Create Identical key</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="S3ABORTUPLOADONCREATE">
+                                <input class="firstradio" type="radio" name="S3ABORTUPLOADONCREATE" id="S3ABORTUPLOADONCREATE0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="S3ABORTUPLOADONCREATE" id="S3ABORTUPLOADONCREATE1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div>
                     <label class="configlabel" onclick="showconfigurationhelp(event, 'ANONYMOUSENABLED',this)">Content Server Allow Anonymous</label>
                     <table>
                         <tr>
@@ -1442,7 +1446,7 @@
                 </div>
                 <br>
                 <div>
-                    <label class="configlabel" onclick="showconfigurationhelp(event, 'AANONYMOUSENFORCEREGION',this)">Content Server Enforce Anonymous Region</label>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'ANONYMOUSENFORCEREGION',this)">Content Server Enforce Anonymous Region</label>
                     <table>
                         <tr>
                             <td class="configinput" id="ANONYMOUSENFORCEREGION">
@@ -1457,8 +1461,40 @@
                       </label><input type="text" validate="true" class="configinput inputwide" id="DEFAULTTENANT" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
                 <br>
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'UPLOADSPURGESTALE',this)">Content Server Purge Abandoned Uploads</label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="UPLOADSPURGESTALE">
+                                <input class="firstradio" type="radio" name="UPLOADSPURGESTALE" id="UPLOADSPURGESTALE0" value="0" onchange="validateconfigform('advancedconfigurationdiv')">Disabled
+                                <input type="radio" name="UPLOADSPURGESTALE" id="UPLOADSPURGESTALE1" value="1" onchange="validateconfigform('advancedconfigurationdiv')">Enabled
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'UPLOADSPURGESTALEAFTER',this)">Content Server Upload Abandoned After
+                      </label><input type="number" validate="true" class="configinput" id="UPLOADSPURGESTALEAFTER" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'UPLOADSPURGEINTERVAL',this)">Content Server Purge Upload Interval 
+                      </label><input type="number" validate="true" class="configinput" id="UPLOADSPURGEINTERVAL" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
                 <div><label class="configlabel" onclick="showconfigurationhelp(event, 'WSCONNECTIONIDLETIMEOUTSECONDS',this)">Content Server idle request timeout 
                       </label><input type="number" validate="true" class="configinput" id="WSCONNECTIONIDLETIMEOUTSECONDS" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'WSOPTARGMEMORYSIZE',this)">Content Server Request Args Memory Size 
+                      </label><input type="number" validate="true" class="configinput" id="WSOPTARGMEMORYSIZE" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'WSLINEBUFFERSIZE',this)">Content Server Max Request Header Size 
+                      </label><input type="number" validate="true" class="configinput" id="WSLINEBUFFERSIZE" oninput="validateconfigform('advancedconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'WSMAXREQUESTHEADERS',this)">Content Server Max Request Headers
+                      </label><input type="number" validate="true" class="configinput" id="WSMAXREQUESTHEADERS" oninput="validateconfigform('advancedconfigurationdiv')" required>
                 </div>
                 <br>
                 <br>
@@ -1701,6 +1737,7 @@
         </div>
 
         <div id="iamedituserdiv" class="iamedituser hidden">
+            <form>
             <div class="iamedituserheading">Nexfs User Management</div>
             <div class="iamedituserid iamedituserheading"  onclick="openshowhelp('EDITUSERUSERID')">User ID</div>
             <div class="iamedituserid iamedituserinput">
@@ -1781,6 +1818,7 @@
             </div>
             <input class="hidden" id="orguserid">
             <input class="hidden" id="userlistrow">
+            </form>
         </div>
 
         <div id="fileselectdiv" class="fileselect hidden">
@@ -1838,20 +1876,21 @@
                 &nbsp;<br><br>
                 <div class="paneltitle">Change Management Console/API Secret Key</div>
                 <div id="iamsecretkey">
+                    <form>
                     <div id="updatesecretediv" class="updatesecretdiv">
                         <div id="secretkeyinfo" class="secretkeyinfo" style="left:50px; top: 70px">
                             <table>
                                 <tr>
                                     <td class="changesecretheading">Current Secret Key:</td>
-                                    <td><input type="password" size="50px" id="currentsecretkey" onchange="validatechangesecretkey()"></td>
+                                    <td><input type="password" size="50px" id="currentsecretkey" autocomplete="off" onchange="validatechangesecretkey()"></td>
                                 </tr>
                                 <tr>
                                     <td class="changesecretheading">New Secret Key:</td>
-                                    <td><input type="password" size="50px" minlength="8" id="newsecretkey" onchange="validatechangesecretkey()"></td>
+                                    <td><input type="password" size="50px" minlength="8" id="newsecretkey"  autocomplete="off" onchange="validatechangesecretkey()"></td>
                                 </tr>
                                 <tr>
                                     <td class="changesecretheading">Re-Enter New Secret Key:</td>
-                                    <td><input type="password" size="50px" minlength="8" id="newsecretkey2" onchange="validatechangesecretkey()"></td>
+                                    <td><input type="password" size="50px" minlength="8" id="newsecretkey2"  autocomplete="off" onchange="validatechangesecretkey()"></td>
                                 </tr>
                                 <tr id="secretnotmatch" class="hidden">
                                     <td>New Secret Key values must match</td>
@@ -1874,6 +1913,7 @@
                             </table>
                         </div>
                     </div>
+                    </form>
                 </div>
             </div>
             <div id="iamaccountsconfigurationdiv" class="subpaneldiv configurationtabdiv">
@@ -1971,6 +2011,8 @@
                 <button name="itargets" id="itargetsbutton" class="topmenutablinks active" onclick="changetopmenuselected(event, 'iscsidiv')">Targets</button>
                 <button name="iaccounts" id="iaccountsbutton" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Accounts</button>
                 <button name="iinterfaces" id="iinterfacesbutton" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Interfaces</button>
+                <button name="iconfiguration" id="iconfigurationbutton" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Configuration</button>
+                <button name="iscsiactiveinformation" id="iscsiactiveinformation" class="topmenutablinks" onclick="changetopmenuselected(event, 'iscsidiv')">Active Information</button>
             </div>
             <div id="itargetsconfigurationdiv" class="subpaneldiv configurationtabdiv" style="display: inherit;">
                 &nbsp;<br><br>
@@ -2075,8 +2117,129 @@
                     </table>
                 </div>
 
-
                 <br>
+            </div>
+            <div id="iconfigurationconfigurationdiv" class="subpaneldiv configurationtabdiv storageconfigurationtabdiv" style="line-height: 1.8;">
+                <div name="refreshdata" class="button" style="left:900px; top: 10px" onclick="createconfvarsrequest('iconfigurationconfigurationdiv');">
+                    <center>Refresh</center>
+                </div>
+                &nbsp;<br><br>
+                <div class="paneltitle">iSCSI Target Settings</div>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSISERVERID',this)">
+                    iSCSI Server ID</label><input type="number" validate="true" class="configinput" id="ISCSISERVERID" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIIOTHREADS',this)">
+                    iSCSI IO Threads</label><input type="number" validate="true" class="configinput" id="ISCSIIOTHREADS" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIMAXTARGETS',this)">
+                    iSCSI Max Targets</label><input type="number" validate="true" class="configinput" id="ISCSIMAXTARGETS" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIMAXLUNS',this)">
+                    iSCSI Max LUNs</label><input type="number" validate="true" class="configinput" id="ISCSIMAXLUNS" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIMAXBINDINGS',this)">
+                    iSCSI Max Bindings</label><input type="number" validate="true" class="configinput" id="ISCSIMAXBINDINGS" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIMAXINTERFACES',this)">
+                    iSCSI Max Interfaces(Portals)</label><input type="number" validate="true" class="configinput" id="ISCSIMAXINTERFACES" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIIQN',this)">iSCSI IQN 
+                  </label><input type="text" validate="true" class="configinput inputdirectory" id="ISCSIIQN" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br> 
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIIQNLOCALPART',this)">iSCSI IQN Local Part
+                  </label><input type="text" validate="true" class="configinput inputdirectory" id="ISCSIIQNLOCALPART" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br> 
+                <div>
+                    <label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIENABLETGTADM',this)">Tgtadm support
+                </label>
+                    <table>
+                        <tr>
+                            <td class="configinput" id="ISCSIENABLETGTADM">
+                                <input class="firstradio" type="radio" name="ISCSIENABLETGTADM" id="ISCSIENABLETGTADM0" value="0" onchange="validateconfigform('iconfigurationconfigurationdiv')">No
+                                <input type="radio" name="ISCSIENABLETGTADM" id="ISCSIENABLETGTADM1" value="1" onchange="validateconfigform('iconfigurationconfigurationdiv')">Yes
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIPORTTGTADM',this)">Tgtadm Socket Number
+            </label><input type="number" validate="true" class="configinput" id="ISCSIPORTTGTADM" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br>
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIDIRIPC',this)">iSCSI IPC Socket Dir 
+                  </label><input type="text" validate="true" class="configinput inputdirectory" id="ISCSIDIRIPC" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br> 
+                <div><label class="configlabel" onclick="showconfigurationhelp(event, 'ISCSIDIRIPCTGTADM',this)">iSCSI IPC TGTADM Symlink Dir 
+                  </label><input type="text" validate="true" class="configinput inputdirectory" id="ISCSIDIRIPCTGTADM" oninput="validateconfigform('iconfigurationconfigurationdiv')" required>
+                </div>
+                <br> 
+                <br>
+                <br>
+                <table>
+                    <tr>
+                        <td>
+                            <div id="updateiconfigurationconfigurationdiv" class="button" style="left:50px;" onclick="saveformconfvars('iconfigurationconfigurationdiv');">
+                                <center>Update</center>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="reverticonfigurationconfigurationdiv" class="button" style="left:50px;" onclick="createconfvarsrequest('iconfigurationconfigurationdiv');">
+                                <center>Revert</center>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <p><b>Configuration Notes: </b></p>
+                <ul>
+                    <li><b>Restart</b>: iSCSI target settings generally require a iSCSI service restart to become active, not a full Nexfs restart.</li>
+                </ul>
+                <br><br>
+            </div>
+            <div id="iscsiactiveinformationconfigurationdiv" class="subpaneldiv configurationtabdiv">
+                &nbsp;<br><br>
+                <div class="paneltitle">iSCSI Active Target Information</div>
+
+                <div class="iscsiactiveinformationsdiv" id="iscsiactiveinformationdiv" >
+
+                <div style="line-height: 1.5; left: 50px; position: relative;"></div>
+                    <br>
+                    <table>
+                        <tr>
+                            <td><div class="iscsilabel">Show</div></td>
+                            <td>
+                                <select class="" id="iscsiinformationrequested" onchange="toggleIscsiInformationTarget();">
+                                    <option value="showtarget" selected>Target</option>
+                                    <option value="showtargets">All Targets</option>
+                                    <option value="showaccounts">Accounts</option>
+                                    <option value="showinterfaces">Interfaces</option>
+                                    <option value="showsessions">All Sessions</option>
+                                    <option value="showtargetsession">Target Sessions</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" class="" id="iscsiinformationtarget" value="1" style="width: auto;" > 
+                            </td>
+                            <td>
+                                <div id="iscsiactiveinfomrationload" class="button" style="left:50px;" onclick="retreiveiscsiinformation();">
+                                    <center>Retrieve</center>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <div id="iscsiinformation" class="iscsiinformation">Select information to view and click Retreve</div>
+
             </div>
         </div>
 
